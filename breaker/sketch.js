@@ -8,6 +8,7 @@ var change_ball_x = 0
 var change_ball_y = 4
 var paddle_width = 200
 var ball_diameter = 55
+var hit_any_corner = false
 
 function setup() {
   // createCanvas(w,h)
@@ -21,7 +22,8 @@ function draw() {
   // background(R, G, B)
   background(105,105,105)
   noStroke()
-  fill("red")
+  fill("white")
+  hit_any_corner = false
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -72,11 +74,12 @@ function draw() {
 
   if(ball_hit_LCorner_paddle){
     console.log("hitLcorner")
-    ball_x_pos -=5
-    ball_y_pos -=5
+    hit_any_corner = true
+    ball_x_pos -=10
+    ball_y_pos -=10
     change_ball_y = -(change_ball_y)
     if(change_ball_x == 0){
-      change_ball_x = -(change_ball_x+5)
+      change_ball_x = -(change_ball_x+10)
     }else if(Math.sign(change_ball_x) == -1) {
       return
     }else{
@@ -87,21 +90,23 @@ function draw() {
 
   if(ball_hit_RCorner_paddle){
     console.log("hitRcorner")
-    ball_x_pos += 5
-    ball_y_pos -= 5
+    hit_any_corner = true
+    ball_x_pos += 10
+    ball_y_pos -= 10
     change_ball_y = -(change_ball_y)
     if(change_ball_x == 0){
-      change_ball_x = change_ball_x + 5
+      change_ball_x = change_ball_x + 10
     } else if(Math.sign(change_ball_x) == 1){
       return
     } else {
       change_ball_x = -(change_ball_x)
     }
   }
-
-  if(ball_hit_paddle_surface){
-    console.log("hitpaddle")
-    change_ball_y = -change_ball_y
+  if(!hit_any_corner){
+    if(ball_hit_paddle_surface){
+      console.log("hitpaddle")
+      change_ball_y = -change_ball_y
+    }
   }
 
   ball_x_pos += change_ball_x
