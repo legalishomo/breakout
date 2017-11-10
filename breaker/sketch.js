@@ -2,8 +2,8 @@ var paddle_x = 250;
 var MAX_X = 700;
 var MIN_X = 0;
 var speed = 10
-var ball_x_pos = 100
-var ball_y_pos = 100
+var ball_x_pos = 300
+var ball_y_pos = 300
 var change_ball_x = 0
 var change_ball_y = 4
 var paddle_width = 200
@@ -21,7 +21,7 @@ function draw() {
   // background(R, G, B)
   background(105,105,105)
   noStroke()
-  fill("white")
+  fill("red")
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -53,26 +53,25 @@ function draw() {
   ball_hit_floor = collideLineCircle(0, height, width, height, ball_x_pos, ball_y_pos, ball_diameter)
   if(ball_hit_left_wall || ball_hit_right_wall){
     change_ball_x = -change_ball_x
-    console.log("hit wall")
+    // console.log("hit wall")
   }
   if(ball_hit_ceiling || ball_hit_floor){
     change_ball_y = -change_ball_y
   }
 
-  // PADDLE LEFT AND RIGHT SIDES
+  // PADDLE LEFT, CENTER, RIGHT SIDES
 
-  ball_hit_Rside_paddle = collideLineCircle(paddle_x+paddle_width-1, height-40, paddle_x+paddle_width-1, height-20, ball_x_pos, ball_y_pos, ball_diameter)
   stroke("red")
-
   ball_hit_paddle_surface = collideRectCircle(paddle_x, height -40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
 
 
   rect(paddle_x-30, height -40, 30, 20)
-
+  rect(paddle_x + paddle_width, height -40, 30, 20)
   ball_hit_LCorner_paddle = collideRectCircle(paddle_x-30, height -40, 30, 20,ball_x_pos, ball_y_pos, ball_diameter)
+  ball_hit_RCorner_paddle = collideRectCircle(paddle_x + paddle_width, height -40, 30, 20, ball_x_pos, ball_y_pos, ball_diameter)
 
   if(ball_hit_LCorner_paddle){
-    console.log("hit")
+    console.log("hitLcorner")
     ball_x_pos -=5
     ball_y_pos -=5
     change_ball_y = -(change_ball_y)
@@ -84,6 +83,20 @@ function draw() {
       change_ball_x = -(change_ball_x)
     }
 
+  }
+
+  if(ball_hit_RCorner_paddle){
+    console.log("hitRcorner")
+    ball_x_pos += 5
+    ball_y_pos -= 5
+    change_ball_y = -(change_ball_y)
+    if(change_ball_x == 0){
+      change_ball_x = change_ball_x + 5
+    } else if(Math.sign(change_ball_x) == 1){
+      return
+    } else {
+      change_ball_x = -(change_ball_x)
+    }
   }
 
   if(ball_hit_paddle_surface){
