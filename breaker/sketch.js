@@ -1,4 +1,3 @@
-var paddle_x = 250;
 // var MAX_X = 700;
 // var MIN_X = 0;
 var speed = 8
@@ -6,21 +5,26 @@ var ball_x_pos = 300
 var ball_y_pos = 300
 var change_ball_x = 0
 var change_ball_y = 8
+// var hit_any_side = false
+
+
+// ==========PADDLE SETUP
+var paddle_x = 350;
 var paddle_width = 60
 var paddle_height = 20
-var ball_diameter = 30
-var hit_any_side = false
 
 function Paddle(x,y){
   this.x = x
   this.y = y
+  this.width = paddle_width,
   this.height = paddle_height
-  this.width = paddle_width
 }
 
 Paddle.prototype.display = function(){
   noStroke()
   fill("white")
+  // rectMode(RADIUS) sets the x, y of rect() to now be the center point of the rectangle
+  // and the w,h to be half of the rect()'s width and height
   rect(this.x, this.y, this.width, this.height)
 }
 
@@ -28,8 +32,20 @@ Paddle.prototype.update = function(){
   this.x = paddle_x
 }
 
+// =========UTILITY
+
+function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point_y){
+  let distance_between_points = dist(circle_x, circle_y, point_x, point_y)
+  if(distance_between_points <= circle_radius){
+    return true
+  }
+}
+
+// ==============SKETCH
+
 function setup() {
   // createCanvas(w,h)
+  // 'height' is variable in P5 that is set to the canvas' height
   createCanvas(700, 700)
   paddle = new Paddle(paddle_x, height-40)
 }
@@ -38,6 +54,7 @@ function setup() {
 // to not loop, call noLoop() in the setUp() function
 function draw() {
   // rect(x, y, w, h)
+  // ellipse(x,y,w,[h])
   // background(R, G, B)
   background(105,105,105)
   paddle.update()
@@ -58,6 +75,38 @@ function draw() {
       paddle_x += speed
     }
   }
+  fill("red")
+  ellipseMode(RADIUS)
+  ellipse(mouseX, mouseY, 20)
+  stroke("red")
+
+  noStroke()
+
+  let lineX2
+  if(mouseX<=paddle.x){
+    lineX2 = paddle.x
+  }else if(mouseX>=paddle.x+paddle_width-1){
+    lineX2 = paddle.x + paddle_width-1
+  }else{
+    lineX2 = mouseX
+  }
+
+  let lineY2
+  if(mouseY>=paddle.y){
+    lineY2 = mouseY
+  }else{
+    lineY2 = paddle.y
+  }
+
+  line(mouseX, mouseY, lineX2, lineY2)
+
+  if(ballCollideWithPaddle(mouseX, mouseY,20,lineX2,lineY2)){
+    console.log("success")
+  }
+
+
+  // stroke("black")
+  // point(mouseX, paddle.y)
 
 
   // // WALL LINES ( BORDER )
