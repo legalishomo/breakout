@@ -1,18 +1,37 @@
 var paddle_x = 250;
-var MAX_X = 700;
-var MIN_X = 0;
-var speed = 10
+// var MAX_X = 700;
+// var MIN_X = 0;
+var speed = 8
 var ball_x_pos = 300
 var ball_y_pos = 300
 var change_ball_x = 0
-var change_ball_y = 4
+var change_ball_y = 8
 var paddle_width = 60
+var paddle_height = 20
 var ball_diameter = 30
 var hit_any_side = false
+
+function Paddle(x,y){
+  this.x = x
+  this.y = y
+  this.height = paddle_height
+  this.width = paddle_width
+}
+
+Paddle.prototype.display = function(){
+  noStroke()
+  fill("white")
+  rect(this.x, this.y, this.width, this.height)
+}
+
+Paddle.prototype.update = function(){
+  this.x = paddle_x
+}
 
 function setup() {
   // createCanvas(w,h)
   createCanvas(700, 700)
+  paddle = new Paddle(paddle_x, height-40)
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -21,9 +40,8 @@ function draw() {
   // rect(x, y, w, h)
   // background(R, G, B)
   background(105,105,105)
-  noStroke()
-  fill("white")
-  hit_any_side = false
+  paddle.update()
+  paddle.display()
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -42,105 +60,115 @@ function draw() {
   }
 
 
-  // WALL LINES ( BORDER )
-  // line(x1, y1, x2, y2)
-  line(0,0,width,0)
-  line(0,0,0,height)
-  line(width,0,width,height)
-  line(0, height, width, height)
-
-  ball_hit_left_wall = collideLineCircle(0,0,0,height,ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_right_wall = collideLineCircle(width, 0, width, height, ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_ceiling = collideLineCircle(0,0,width,0,ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_floor = collideLineCircle(0, height, width, height, ball_x_pos, ball_y_pos, ball_diameter)
-  if(ball_hit_left_wall || ball_hit_right_wall){
-    change_ball_x = -change_ball_x
-    // console.log("hit wall")
-  }
-  if(ball_hit_ceiling || ball_hit_floor){
-    change_ball_y = -change_ball_y
-  }
-
-  // PADDLE LEFT, CENTER, RIGHT (SURFACE)
-
-  stroke("red")
-  rect(paddle_x-60, height-40, paddle_width, 20)
-  rect(paddle_x+paddle_width, height-40, paddle_width, 20)
-  ball_hit_paddle_LEFT_surface = collideRectCircle(paddle_x-60, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_paddle_RIGHT_surface = collideRectCircle(paddle_x+paddle_width, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_paddle_CENTER_surface = collideRectCircle(paddle_x, height -40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-
-  // PADDLE CORNERS
-  rect(paddle_x-90, height -40, 30, 20)
-  rect(paddle_x + paddle_width+60, height -40, 30, 20)
-  ball_hit_LCorner_paddle = collideRectCircle(paddle_x-90, height -40, 30, 20,ball_x_pos, ball_y_pos, ball_diameter)
-  ball_hit_RCorner_paddle = collideRectCircle(paddle_x + paddle_width+90, height -40, 30, 20, ball_x_pos, ball_y_pos, ball_diameter)
-
-  if(ball_hit_LCorner_paddle){
-    console.log("hitLcorner")
-    hit_any_side = true
-    ball_x_pos -=10
-    ball_y_pos -=10
-    change_ball_y = -(change_ball_y)
-    if(change_ball_x == 0){
-      change_ball_x = -(change_ball_x+10)
-    }else if(Math.sign(change_ball_x) == -1) {
-      return
-    }else{
-      change_ball_x = -(change_ball_x)
-    }
-
-  }
-
-  if(ball_hit_RCorner_paddle){
-    console.log("hitRcorner")
-    hit_any_side = true
-    ball_x_pos += 10
-    ball_y_pos -= 10
-    change_ball_y = -(change_ball_y)
-    if(change_ball_x == 0){
-      change_ball_x = change_ball_x + 10
-    } else if(Math.sign(change_ball_x) == 1){
-      return
-    } else {
-      change_ball_x = -(change_ball_x)
-    }
-  }
-
-  if(ball_hit_paddle_LEFT_surface && !hit_any_side){
-    hit_any_side = true
-    console.log("hitLSurface")
-    if(change_ball_x == 0){
-      change_ball_y = -(change_ball_y+4)
-      change_ball_x = -(change_ball_x+6)
-    }else if(Math.sign(change_ball_x) == -1) {
-      change_ball_y = -(change_ball_y)
-    }else{
-
-      change_ball_y = -(change_ball_y)
-      change_ball_x = -(change_ball_x)
-    }
-  }
-
-  if(!hit_any_side){
-    if(ball_hit_paddle_CENTER_surface){
-      console.log("hitpaddle")
-      change_ball_y = -change_ball_y
-    }
-  }
-
-  ball_x_pos += change_ball_x
-  ball_y_pos += change_ball_y
-
-  stroke("blue")
-  rect(paddle_x, height -40, paddle_width, 20)
-  ellipse(ball_x_pos, ball_y_pos, ball_diameter, ball_diameter)
+  // // WALL LINES ( BORDER )
+  // // line(x1, y1, x2, y2)
+  // line(0,0,width,0)
+  // line(0,0,0,height)
+  // line(width,0,width,height)
+  // line(0, height, width, height)
+  //
+  // ball_hit_left_wall = collideLineCircle(0,0,0,height,ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_right_wall = collideLineCircle(width, 0, width, height, ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_ceiling = collideLineCircle(0,0,width,0,ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_floor = collideLineCircle(0, height, width, height, ball_x_pos, ball_y_pos, ball_diameter)
+  // if(ball_hit_left_wall || ball_hit_right_wall){
+  //   change_ball_x = -change_ball_x
+  //   // console.log("hit wall")
+  // }
+  // if(ball_hit_ceiling || ball_hit_floor){
+  //   change_ball_y = -change_ball_y
+  // }
+  //
+  // // PADDLE LEFT, CENTER, RIGHT (SURFACE)
+  //
+  // stroke("red")
+  // rect(paddle_x-60, height-40, paddle_width, 20)
+  // rect(paddle_x+paddle_width, height-40, paddle_width, 20)
+  // ball_hit_paddle_LEFT_surface = collideRectCircle(paddle_x-60, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_paddle_RIGHT_surface = collideRectCircle(paddle_x+paddle_width, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_paddle_CENTER_surface = collideRectCircle(paddle_x, height -40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
+  //
+  // // PADDLE CORNERS
+  // rect(paddle_x-90, height -40, 30, 20)
+  // rect(paddle_x + paddle_width+60, height -40, 30, 20)
+  // ball_hit_LCorner_paddle = collideRectCircle(paddle_x-90, height -40, 30, 20,ball_x_pos, ball_y_pos, ball_diameter)
+  // ball_hit_RCorner_paddle = collideRectCircle(paddle_x + paddle_width+90, height -40, 30, 20, ball_x_pos, ball_y_pos, ball_diameter)
+  //
+  // if(ball_hit_LCorner_paddle){
+  //   console.log("hitLcorner")
+  //   hit_any_side = true
+  //   // ball_x_pos -=10
+  //   // ball_y_pos -=10
+  //   change_ball_y = -(change_ball_y)
+  //   if(change_ball_x == 0){
+  //     change_ball_x = -(change_ball_x+4)
+  //   }else if(Math.sign(change_ball_x) == -1) {
+  //     return
+  //   }else{
+  //     change_ball_x = -(change_ball_x)
+  //   }
+  //
+  // }
+  //
+  // if(ball_hit_RCorner_paddle){
+  //   console.log("hitRcorner")
+  //   hit_any_side = true
+  //   // ball_x_pos += 10
+  //   // ball_y_pos -= 10
+  //   change_ball_y = -(change_ball_y)
+  //   if(change_ball_x == 0){
+  //     change_ball_x = change_ball_x + 4
+  //   } else if(Math.sign(change_ball_x) == 1){
+  //     return
+  //   } else {
+  //     change_ball_x = -(change_ball_x)
+  //   }
+  // }
+  //
+  // if(ball_hit_paddle_LEFT_surface && !hit_any_side){
+  //   hit_any_side = true
+  //   console.log("hitLSurface")
+  //   if(change_ball_x == 0){
+  //     // change_ball_y = -(change_ball_y+4)
+  //     change_ball_x = -(change_ball_x+4)
+  //   }else if(Math.sign(change_ball_x) == -1) {
+  //     change_ball_y = -(change_ball_y)
+  //   }else{
+  //     change_ball_y = -(change_ball_y)
+  //     change_ball_x = -(change_ball_x)
+  //   }
+  // }
+  //
+  // if(ball_hit_paddle_RIGHT_surface && !hit_any_side){
+  //   hit_any_side = true
+  //   console.log("hitRsurface")
+  //   if(change_ball_x ==0){
+  //     // change_ball_y = -(change_ball_y+4)
+  //     change_ball_x = change_ball_x + 4
+  //   } else if(Math.sign(change_ball_x) == 1){
+  //     change_ball_y = -(change_ball_y)
+  //   } else{
+  //     change_ball_y = -(change_ball_y)
+  //     change_ball_x = -(change_ball_x)
+  //   }
+  // }
+  //
+  // if(!hit_any_side){
+  //   if(ball_hit_paddle_CENTER_surface){
+  //     console.log("hitpaddle")
+  //     change_ball_y = -change_ball_y
+  //   }
+  // }
+  //
+  // ball_x_pos += change_ball_x
+  // ball_y_pos += change_ball_y
+  //
+  // stroke("blue")
+  // rect(paddle_x, height -40, paddle_width, 20)
+  // ellipse(ball_x_pos, ball_y_pos, ball_diameter, ball_diameter)
 
 
 }
-
-
-
 
 
 
