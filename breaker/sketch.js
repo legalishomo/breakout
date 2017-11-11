@@ -65,14 +65,16 @@ function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point
   }
 }
 
-function ballCollideWithWall(circle_x, circle_y, circle_radius){
+function ballCollideWithWall(circle_x, circle_radius){
   if(circle_x-circle_radius <= 0 || circle_x+circle_radius >= width){
     return true
   }
 }
 
-function ballCollideWithCeiling(){
-  
+function ballCollideWithCeiling(circle_y, circle_radius){
+  if(circle_y-circle_radius <=0 || circle_y+circle_radius >= height){
+    return true
+  }
 }
 
 // ==============SKETCH
@@ -141,8 +143,12 @@ function draw() {
     console.log("success")
   }
 
-  if(ballCollideWithWall(mouseX,mouseY,20)){
+  if(ballCollideWithWall(mouseX, 20)){
     console.log("hitting wall")
+  }
+
+  if(ballCollideWithCeiling(mouseY, 20)){
+    console.log("hitting ceiling")
   }
 
 
