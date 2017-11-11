@@ -29,7 +29,7 @@ Paddle.prototype.update = function(){
 const ball_start_x = 300
 const ball_start_y = 300
 const ball_radius = 20
-var ball_change_x = 0
+var ball_change_x = 5
 var ball_change_y = 8
 const start_position = true
 
@@ -63,7 +63,7 @@ Ball.prototype.changeBallXDirection = function(){
 }
 
 
-// LINE USED TO CONNECT BALL TO PADDLE AND DETECT COLLISION
+// LINE USED TO CONNECT BALL TO PADDLE AND DETECT COLLISION FROM POINT TO POINT
 function BallToPaddleLine(x1,y1, x2,y2){
   this.x1 = x1
   this.x2 = x2
