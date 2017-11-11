@@ -1,17 +1,9 @@
-// var MAX_X = 700;
-// var MIN_X = 0;
-var speed = 8
-var ball_x_pos = 300
-var ball_y_pos = 300
-var change_ball_x = 0
-var change_ball_y = 8
-// var hit_any_side = false
-
 
 // ==========PADDLE SETUP
+var speed = 8
 var paddle_x = 350;
 var paddle_width = 60
-var paddle_height = 20
+const paddle_height = 20
 
 function Paddle(x,y){
   this.x = x
@@ -32,6 +24,38 @@ Paddle.prototype.update = function(){
   this.x = paddle_x
 }
 
+// ========BALL setup
+
+const ball_start_x = 300
+const ball_start_y = 300
+const ball_radius = 20
+const ball_change_x = 0
+const ball_change_y = 8
+const start_position = true
+
+function Ball(x, y, radius){
+  this.x = x
+  this.y = y
+  this.radius = radius
+  this.diameter = radius * 2
+  this.change_x = ball_change_x
+  this.change_y = ball_change_y
+}
+
+Ball.prototype.display = function(){
+  noStroke()
+  fill("white")
+  ellipseMode(RADIUS)
+  ellipse(this.x, this.y, this.radius)
+}
+
+Ball.prototype.update = function(){
+  this.x += ball_change_x
+  this.y += ball_change_y
+}
+
+
+
 // =========UTILITY
 
 function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point_y){
@@ -41,6 +65,16 @@ function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point
   }
 }
 
+function ballCollideWithWall(circle_x, circle_y, circle_radius){
+  if(circle_x-circle_radius <= 0 || circle_x+circle_radius >= width){
+    return true
+  }
+}
+
+function ballCollideWithCeiling(){
+  
+}
+
 // ==============SKETCH
 
 function setup() {
@@ -48,6 +82,7 @@ function setup() {
   // 'height' is variable in P5 that is set to the canvas' height
   createCanvas(700, 700)
   paddle = new Paddle(paddle_x, height-40)
+  ball = new Ball(ball_start_x, ball_start_y, ball_radius)
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -58,7 +93,9 @@ function draw() {
   // background(R, G, B)
   background(105,105,105)
   paddle.update()
+  ball.update()
   paddle.display()
+  ball.display()
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -80,7 +117,7 @@ function draw() {
   ellipse(mouseX, mouseY, 20)
   stroke("red")
 
-  noStroke()
+  stroke("black")
 
   let lineX2
   if(mouseX<=paddle.x){
@@ -102,6 +139,10 @@ function draw() {
 
   if(ballCollideWithPaddle(mouseX, mouseY,20,lineX2,lineY2)){
     console.log("success")
+  }
+
+  if(ballCollideWithWall(mouseX,mouseY,20)){
+    console.log("hitting wall")
   }
 
 
