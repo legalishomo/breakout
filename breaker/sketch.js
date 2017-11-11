@@ -29,8 +29,8 @@ Paddle.prototype.update = function(){
 const ball_start_x = 300
 const ball_start_y = 300
 const ball_radius = 20
-const ball_change_x = 0
-const ball_change_y = 8
+var ball_change_x = 0
+var ball_change_y = 8
 const start_position = true
 
 function Ball(x, y, radius){
@@ -50,10 +50,49 @@ Ball.prototype.display = function(){
 }
 
 Ball.prototype.update = function(){
-  this.x += ball_change_x
-  this.y += ball_change_y
+  this.x += this.change_x
+  this.y += this.change_y
 }
 
+Ball.prototype.changeBallYDirection = function(){
+  this.change_y = -(this.change_y)
+}
+
+Ball.prototype.changeBallXDirection = function(){
+  this.change_x = -(this.change_x)
+}
+
+
+// LINE USED TO CONNECT BALL TO PADDLE AND DETECT COLLISION
+function BallToPaddleLine(x1,y1, x2,y2){
+  this.x1 = x1
+  this.x2 = x2
+  this.y1 = y1
+  this.y2 = y2
+}
+
+BallToPaddleLine.prototype.render = function(){
+  stroke("black")
+  line(this.x1, this.y1, this.x2, this.y2)
+}
+
+BallToPaddleLine.prototype.update = function(paddle, paddle_width, ball_x_pos, ball_y_pos){
+  this.x1 = ball_x_pos
+  this.y1 = ball_y_pos
+  if(ball_x_pos<=paddle.x){
+    this.x2 = paddle.x
+  }else if(ball_x_pos>=paddle.x+paddle_width-1){
+    this.x2 = paddle.x + paddle_width-1
+  }else{
+    this.x2 = ball_x_pos
+  }
+
+  if(ball_y_pos>=paddle.y){
+    this.y2 = ball_y_pos
+  }else{
+    this.y2 = paddle.y
+  }
+}
 
 
 // =========UTILITY
@@ -65,14 +104,8 @@ function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point
   }
 }
 
-function ballCollideWithWall(circle_x, circle_radius){
-  if(circle_x-circle_radius <= 0 || circle_x+circle_radius >= width){
-    return true
-  }
-}
-
-function ballCollideWithCeiling(circle_y, circle_radius){
-  if(circle_y-circle_radius <=0 || circle_y+circle_radius >= height){
+function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
+  if(circle_axis-circle_radius <=0 || circle_axis+circle_radius >= canvas_dimension){
     return true
   }
 }
@@ -85,6 +118,7 @@ function setup() {
   createCanvas(700, 700)
   paddle = new Paddle(paddle_x, height-40)
   ball = new Ball(ball_start_x, ball_start_y, ball_radius)
+  paddle_line = new BallToPaddleLine(mouseX, mouseY, paddle_x, height-40)
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -96,8 +130,10 @@ function draw() {
   background(105,105,105)
   paddle.update()
   ball.update()
+  paddle_line.update(paddle, paddle_width, mouseX, mouseY)
   paddle.display()
   ball.display()
+  paddle_line.render()
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -114,154 +150,23 @@ function draw() {
       paddle_x += speed
     }
   }
+
   fill("red")
   ellipseMode(RADIUS)
   ellipse(mouseX, mouseY, 20)
   stroke("red")
 
-  stroke("black")
-
-  let lineX2
-  if(mouseX<=paddle.x){
-    lineX2 = paddle.x
-  }else if(mouseX>=paddle.x+paddle_width-1){
-    lineX2 = paddle.x + paddle_width-1
-  }else{
-    lineX2 = mouseX
+  // if ball hits ceiling or floor
+  if(ballCollideWithWall(ball.x, ball.radius, width)){
+    console.log("hit l or r")
+    ball.changeBallXDirection()
   }
 
-  let lineY2
-  if(mouseY>=paddle.y){
-    lineY2 = mouseY
-  }else{
-    lineY2 = paddle.y
+  // if ball hits left or right wall
+  if(ballCollideWithWall(ball.y, ball.radius, height)){
+    console.log("hit f or c")
+    ball.changeBallYDirection()
   }
-
-  line(mouseX, mouseY, lineX2, lineY2)
-
-  if(ballCollideWithPaddle(mouseX, mouseY,20,lineX2,lineY2)){
-    console.log("success")
-  }
-
-  if(ballCollideWithWall(mouseX, 20)){
-    console.log("hitting wall")
-  }
-
-  if(ballCollideWithCeiling(mouseY, 20)){
-    console.log("hitting ceiling")
-  }
-
-
-  // stroke("black")
-  // point(mouseX, paddle.y)
-
-
-  // // WALL LINES ( BORDER )
-  // // line(x1, y1, x2, y2)
-  // line(0,0,width,0)
-  // line(0,0,0,height)
-  // line(width,0,width,height)
-  // line(0, height, width, height)
-  //
-  // ball_hit_left_wall = collideLineCircle(0,0,0,height,ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_right_wall = collideLineCircle(width, 0, width, height, ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_ceiling = collideLineCircle(0,0,width,0,ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_floor = collideLineCircle(0, height, width, height, ball_x_pos, ball_y_pos, ball_diameter)
-  // if(ball_hit_left_wall || ball_hit_right_wall){
-  //   change_ball_x = -change_ball_x
-  //   // console.log("hit wall")
-  // }
-  // if(ball_hit_ceiling || ball_hit_floor){
-  //   change_ball_y = -change_ball_y
-  // }
-  //
-  // // PADDLE LEFT, CENTER, RIGHT (SURFACE)
-  //
-  // stroke("red")
-  // rect(paddle_x-60, height-40, paddle_width, 20)
-  // rect(paddle_x+paddle_width, height-40, paddle_width, 20)
-  // ball_hit_paddle_LEFT_surface = collideRectCircle(paddle_x-60, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_paddle_RIGHT_surface = collideRectCircle(paddle_x+paddle_width, height-40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_paddle_CENTER_surface = collideRectCircle(paddle_x, height -40, paddle_width, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  //
-  // // PADDLE CORNERS
-  // rect(paddle_x-90, height -40, 30, 20)
-  // rect(paddle_x + paddle_width+60, height -40, 30, 20)
-  // ball_hit_LCorner_paddle = collideRectCircle(paddle_x-90, height -40, 30, 20,ball_x_pos, ball_y_pos, ball_diameter)
-  // ball_hit_RCorner_paddle = collideRectCircle(paddle_x + paddle_width+90, height -40, 30, 20, ball_x_pos, ball_y_pos, ball_diameter)
-  //
-  // if(ball_hit_LCorner_paddle){
-  //   console.log("hitLcorner")
-  //   hit_any_side = true
-  //   // ball_x_pos -=10
-  //   // ball_y_pos -=10
-  //   change_ball_y = -(change_ball_y)
-  //   if(change_ball_x == 0){
-  //     change_ball_x = -(change_ball_x+4)
-  //   }else if(Math.sign(change_ball_x) == -1) {
-  //     return
-  //   }else{
-  //     change_ball_x = -(change_ball_x)
-  //   }
-  //
-  // }
-  //
-  // if(ball_hit_RCorner_paddle){
-  //   console.log("hitRcorner")
-  //   hit_any_side = true
-  //   // ball_x_pos += 10
-  //   // ball_y_pos -= 10
-  //   change_ball_y = -(change_ball_y)
-  //   if(change_ball_x == 0){
-  //     change_ball_x = change_ball_x + 4
-  //   } else if(Math.sign(change_ball_x) == 1){
-  //     return
-  //   } else {
-  //     change_ball_x = -(change_ball_x)
-  //   }
-  // }
-  //
-  // if(ball_hit_paddle_LEFT_surface && !hit_any_side){
-  //   hit_any_side = true
-  //   console.log("hitLSurface")
-  //   if(change_ball_x == 0){
-  //     // change_ball_y = -(change_ball_y+4)
-  //     change_ball_x = -(change_ball_x+4)
-  //   }else if(Math.sign(change_ball_x) == -1) {
-  //     change_ball_y = -(change_ball_y)
-  //   }else{
-  //     change_ball_y = -(change_ball_y)
-  //     change_ball_x = -(change_ball_x)
-  //   }
-  // }
-  //
-  // if(ball_hit_paddle_RIGHT_surface && !hit_any_side){
-  //   hit_any_side = true
-  //   console.log("hitRsurface")
-  //   if(change_ball_x ==0){
-  //     // change_ball_y = -(change_ball_y+4)
-  //     change_ball_x = change_ball_x + 4
-  //   } else if(Math.sign(change_ball_x) == 1){
-  //     change_ball_y = -(change_ball_y)
-  //   } else{
-  //     change_ball_y = -(change_ball_y)
-  //     change_ball_x = -(change_ball_x)
-  //   }
-  // }
-  //
-  // if(!hit_any_side){
-  //   if(ball_hit_paddle_CENTER_surface){
-  //     console.log("hitpaddle")
-  //     change_ball_y = -change_ball_y
-  //   }
-  // }
-  //
-  // ball_x_pos += change_ball_x
-  // ball_y_pos += change_ball_y
-  //
-  // stroke("blue")
-  // rect(paddle_x, height -40, paddle_width, 20)
-  // ellipse(ball_x_pos, ball_y_pos, ball_diameter, ball_diameter)
 
 
 }
