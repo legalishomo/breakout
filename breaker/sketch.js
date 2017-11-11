@@ -28,9 +28,13 @@ Paddle.prototype.update = function(){
 
 const ball_start_x = 300
 const ball_start_y = 300
-const ball_radius = 20
-var ball_change_x = 5
-var ball_change_y = 8
+const ball_radius = 10
+var ball_change_x = 4
+var sqr_ball_change_x = ball_change_x**2
+var ball_change_y = 7
+var sqr_ball_change_y = ball_change_y**2
+var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
+
 const start_position = true
 
 function Ball(x, y, radius){
@@ -40,6 +44,7 @@ function Ball(x, y, radius){
   this.diameter = radius * 2
   this.change_x = ball_change_x
   this.change_y = ball_change_y
+  this.delta_distance = ball_delta_distance
 }
 
 Ball.prototype.display = function(){
@@ -50,8 +55,10 @@ Ball.prototype.display = function(){
 }
 
 Ball.prototype.update = function(){
+  // debugger
   this.x += this.change_x
   this.y += this.change_y
+  // debugger
 }
 
 Ball.prototype.changeBallYDirection = function(){
@@ -60,6 +67,20 @@ Ball.prototype.changeBallYDirection = function(){
 
 Ball.prototype.changeBallXDirection = function(){
   this.change_x = -(this.change_x)
+}
+
+Ball.prototype.changeBallAngle = function(angle){
+  let new_change_y = sin(angle) * this.delta_distance
+  let new_change_x = cos(angle) * this.delta_distance
+  if(Math.sign(this.change_y) == -1){
+    debugger
+    this.change_y = -new_change_y
+    this.change_x = new_change_x
+  } else{
+    debugger
+    this.change_y = new_change_y
+    this.change_x = new_change_x
+  }
 }
 
 
@@ -105,7 +126,7 @@ function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point
 }
 
 function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
-  if(circle_axis-circle_radius <=0 || circle_axis+circle_radius >= canvas_dimension){
+  if(circle_axis-circle_radius <=0 || circle_axis >= canvas_dimension-circle_radius){
     return true
   }
 }
@@ -115,10 +136,11 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
 function setup() {
   // createCanvas(w,h)
   // 'height' is variable in P5 that is set to the canvas' height
+  angleMode(DEGREES)
   createCanvas(700, 700)
   paddle = new Paddle(paddle_x, height-40)
   ball = new Ball(ball_start_x, ball_start_y, ball_radius)
-  paddle_line = new BallToPaddleLine(mouseX, mouseY, paddle_x, height-40)
+  // paddle_line = new BallToPaddleLine(mouseX, mouseY, paddle_x, height-40)
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -130,10 +152,10 @@ function draw() {
   background(105,105,105)
   paddle.update()
   ball.update()
-  paddle_line.update(paddle, paddle_width, mouseX, mouseY)
+  // paddle_line.update(paddle, paddle_width, mouseX, mouseY)
   paddle.display()
   ball.display()
-  paddle_line.render()
+  // paddle_line.render()
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x == 0){
@@ -151,21 +173,27 @@ function draw() {
     }
   }
 
-  fill("red")
-  ellipseMode(RADIUS)
-  ellipse(mouseX, mouseY, 20)
-  stroke("red")
+  // fill("red")
+  // ellipseMode(RADIUS)
+  // ellipse(mouseX, mouseY, 20)
+  // stroke("red")
 
-  // if ball hits ceiling or floor
+  // if(ballCollideWithPaddle(mouseX, mouseY, 20, paddle.x, paddle.y)){
+  //   console.log("hitting")
+  // }
+
+  // if ball hits left or right wall
   if(ballCollideWithWall(ball.x, ball.radius, width)){
     console.log("hit l or r")
     ball.changeBallXDirection()
   }
 
-  // if ball hits left or right wall
+  // if ball hits ceiling or floor
   if(ballCollideWithWall(ball.y, ball.radius, height)){
     console.log("hit f or c")
     ball.changeBallYDirection()
+    // debugger
+    ball.changeBallAngle(15)
   }
 
 
