@@ -206,7 +206,7 @@ function draw() {
     // ball.changeBallAngle(15)
   }
 
-  // WHEN BALL HITS CENTER AREA OF PADDLE
+  // IF BALL HITS CENTER AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
     console.log("hitting paddle")
     hit_paddle = true
@@ -214,7 +214,7 @@ function draw() {
     ball.changeBallAngle(90)
   }
 
-  // WHEN BALL HITS CENTER, LEFT AREA OF PADDLE
+  // IF BALL HITS CENTER, LEFT AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
     console.log("success")
     hit_paddle = true
@@ -222,14 +222,14 @@ function draw() {
     ball.changeBallAngle(135)
   }
 
-  // WHEN BALL HITS CENTER, RIGHT AREA OF PADDLE
+  // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !hit_paddle){
     hit_paddle = true
     ball.changeBallYDirection()
     ball.changeBallAngle(45)
   }
 
-  // WHEN BALL HITS LEFT CORNER OF PADDLE
+  // IF BALL HITS LEFT CORNER OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
     console.log("hit corner")
     hit_paddle = true
@@ -237,7 +237,7 @@ function draw() {
     ball.changeBallAngle(150)
   }
 
-  //  WHEN BALL HITS RIGHT CORDER OF PADDLE
+  //  IF BALL HITS RIGHT CORNER OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
     console.log("hit corner")
     hit_paddle = true
