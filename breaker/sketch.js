@@ -44,6 +44,7 @@ var ball_change_y = 9
 var sqr_ball_change_y = ball_change_y**2
 var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
 
+  // ellipse(x,y,w,[h])
 function Ball(x, y, radius){
   this.x = x
   this.y = y
@@ -86,7 +87,6 @@ Ball.prototype.changeBallAngle = function(angle){
   }
 }
 
-
 // LINE USED TO CONNECT BALL TO PADDLE AND DETECT COLLISION FROM POINT TO POINT
 function BallToPaddleLine(x1,y1, x2,y2){
   this.x1 = x1
@@ -120,6 +120,28 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
   }
 }
 
+// ===============BLOCK
+
+var block_width = 116
+var block_height = 50
+  // rect(x, y, w, h)
+function Block(x,y,w,h,i){
+  this.x = x
+  this.y = y
+  this.width = w
+  this.height = h
+  this.index = i
+}
+
+Block.prototype.display = function(){
+  fill("white")
+  rect(this.x, this.y, this.width, this.height)
+}
+
+Block.prototype.remove = function(){
+  blocks.splice(this.index, 1)
+}
+
 
 // =========UTILITY
 
@@ -139,6 +161,7 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
 // ==============SKETCH
 
 var hit_paddle = false
+var blocks = []
 
 function setup() {
   // createCanvas(w,h)
@@ -150,15 +173,28 @@ function setup() {
   ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
   ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
   ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
-  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
-  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
+  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40, edge=true)
+  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40, edge=true)
+
+  let start_x = 40
+  let start_y = 40
+  let h_count = 0
+  let margin = 10
+  for(i=0; i<20; i++){
+    blocks[i] = new Block(start_x, start_y, block_width, block_height, i)
+    start_x += (block_width + margin)
+    h_count += 1
+    if(h_count == 5){
+      h_count = 0
+      start_x = 40
+      start_y += (block_height + margin)
+    }
+  }
 }
 
 // draw() continuously executes the code in the block until program stops
 // to not loop, call noLoop() in the setUp() function
 function draw() {
-  // rect(x, y, w, h)
-  // ellipse(x,y,w,[h])
   // background(R, G, B)
   background(105,105,105)
   hit_paddle = false
@@ -176,6 +212,12 @@ function draw() {
   ball_to_RIGHT_paddle_line.render()
   ball_to_LCORNER_paddle_line.render()
   ball_to_RCORNER_paddle_line.render()
+
+  blocks.forEach((block)=>{
+    block.display()
+  })
+
+
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x <= (paddle_center_areas_width + paddle_edges_width)){
@@ -251,3 +293,4 @@ function draw() {
 // get ball to bounce
 // get ball to bounde off paddle
 // HANDLE EDGE CASE: when ball hits edge of paddle
+// add blocks
