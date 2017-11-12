@@ -226,6 +226,7 @@ function draw() {
 
   Object.values(blocks).forEach((block)=>{
     if(block.wasHit(ball.x, ball.y, ball.diameter)){
+      ball.changeBallYDirection()
       block.remove()
     }
   })
