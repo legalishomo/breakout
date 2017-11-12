@@ -131,6 +131,7 @@ function Block(x,y,w,h,i){
   this.width = w
   this.height = h
   this.index = i
+
 }
 
 Block.prototype.display = function(){
@@ -139,8 +140,12 @@ Block.prototype.display = function(){
   rect(this.x, this.y, this.width, this.height)
 }
 
+Block.prototype.wasHit = function(ball_x, ball_y, ball_diameter){
+  return collideRectCircle(this.x, this.y, this.width, this.height, ball_x, ball_y, ball_diameter)
+}
+
 Block.prototype.remove = function(){
-  blocks.splice(this.index, 1)
+  delete blocks[this.index]
 }
 
 
@@ -162,7 +167,7 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
 // ==============SKETCH
 
 var hit_paddle = false
-var blocks = []
+var blocks = {}
 
 function setup() {
   // createCanvas(w,h)
@@ -191,6 +196,7 @@ function setup() {
       start_y += (block_height + margin)
     }
   }
+
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -214,9 +220,16 @@ function draw() {
   ball_to_LCORNER_paddle_line.render()
   ball_to_RCORNER_paddle_line.render()
 
-  blocks.forEach((block)=>{
+  Object.values(blocks).forEach((block)=>{
     block.display()
   })
+
+  Object.values(blocks).forEach((block)=>{
+    if(block.wasHit(ball.x, ball.y, ball.diameter)){
+      block.remove()
+    }
+  })
+
 
 
   if(keyIsDown(LEFT_ARROW)){
