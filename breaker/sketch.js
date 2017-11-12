@@ -115,7 +115,7 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
     if(ball_y_pos>=paddle.y){
       this.y2 = ball_y_pos
     }else{
-      this.y2 = paddle.y
+      this.y2 = height-40
     }
   }
 }
@@ -134,6 +134,7 @@ function Block(x,y,w,h,i){
 }
 
 Block.prototype.display = function(){
+  noStroke()
   fill("white")
   rect(this.x, this.y, this.width, this.height)
 }
@@ -173,8 +174,8 @@ function setup() {
   ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
   ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
   ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
-  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40, edge=true)
-  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40, edge=true)
+  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
+  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
 
   let start_x = 40
   let start_y = 40
@@ -203,8 +204,8 @@ function draw() {
   ball_to_center_paddle_line.update(paddle_x, paddle_x + paddle_center_areas_width, ball.x, ball.y)
   ball_to_LEFT_paddle_line.update(paddle_x-paddle_center_areas_width, paddle_x -1, ball.x, ball.y)
   ball_to_RIGHT_paddle_line.update(paddle_x+paddle_center_areas_width+1, paddle_x+(paddle_center_areas_width*2), ball.x, ball.y)
-  ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y)
-  ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y)
+  ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y, edge=true)
+  ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y, edge=true)
   paddle.display()
   ball.display()
   ball_to_center_paddle_line.render()
@@ -216,7 +217,6 @@ function draw() {
   blocks.forEach((block)=>{
     block.display()
   })
-
 
 
   if(keyIsDown(LEFT_ARROW)){
@@ -234,6 +234,8 @@ function draw() {
       paddle_x += speed
     }
   }
+
+
 
   // if ball hits left or right wall
   if(ballCollideWithWall(ball.x, ball.radius, width)){
