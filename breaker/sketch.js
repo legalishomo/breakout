@@ -17,7 +17,7 @@ function Paddle(x,y,width){
 }
 
 Paddle.prototype.display = function(){
-  stroke("red")
+  noStroke()
   fill("white")
   // rectMode(RADIUS) sets the x, y of rect() to now be the center point of the rectangle
   // and the w,h to be half of the rect()'s width and height
@@ -96,7 +96,7 @@ function BallToPaddleLine(x1,y1, x2,y2){
 }
 
 BallToPaddleLine.prototype.render = function(){
-  stroke("black")
+  noStroke()
   line(this.x1, this.y1, this.x2, this.y2)
 }
 
@@ -195,20 +195,16 @@ function draw() {
 
   // if ball hits left or right wall
   if(ballCollideWithWall(ball.x, ball.radius, width)){
-    console.log("hit l or r")
     ball.changeBallXDirection()
   }
 
   // if ball hits ceiling or floor
   if(ballCollideWithWall(ball.y, ball.radius, height)){
-    console.log("hit f or c")
     ball.changeBallYDirection()
-    // ball.changeBallAngle(15)
   }
 
   // IF BALL HITS CENTER AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
-    console.log("hitting paddle")
     hit_paddle = true
     ball.changeBallYDirection()
     ball.changeBallAngle(90)
@@ -216,7 +212,6 @@ function draw() {
 
   // IF BALL HITS CENTER, LEFT AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
-    console.log("success")
     hit_paddle = true
     ball.changeBallYDirection()
     ball.changeBallAngle(135)
@@ -231,7 +226,6 @@ function draw() {
 
   // IF BALL HITS LEFT CORNER OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
-    console.log("hit corner")
     hit_paddle = true
     ball.changeBallYDirection()
     ball.changeBallAngle(150)
@@ -239,15 +233,10 @@ function draw() {
 
   //  IF BALL HITS RIGHT CORNER OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
-    console.log("hit corner")
     hit_paddle = true
     ball.changeBallYDirection()
     ball.changeBallAngle(30)
   }
-
-  // if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, point_x, point_y))
-  //
-  //
 
 }
 
