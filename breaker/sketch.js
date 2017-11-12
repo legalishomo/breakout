@@ -178,7 +178,7 @@ function draw() {
   ball_to_RCORNER_paddle_line.render()
 
   if(keyIsDown(LEFT_ARROW)){
-    if(paddle_x <= 0){
+    if(paddle_x <= (paddle_center_areas_width + paddle_edges_width)){
       paddle_x
     } else {
       paddle_x -= speed
@@ -186,7 +186,7 @@ function draw() {
   }
 
   if(keyIsDown(RIGHT_ARROW)){
-    if(paddle_x == width - paddle_full_width){
+    if(paddle_x >= width - ((paddle_center_areas_width*2)+paddle_edges_width)){
       paddle_x
     }else{
       paddle_x += speed
