@@ -35,8 +35,6 @@ var ball_change_y = 7
 var sqr_ball_change_y = ball_change_y**2
 var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
 
-const start_position = true
-
 function Ball(x, y, radius){
   this.x = x
   this.y = y
@@ -55,10 +53,8 @@ Ball.prototype.display = function(){
 }
 
 Ball.prototype.update = function(){
-  // debugger
   this.x += this.change_x
   this.y += this.change_y
-  // debugger
 }
 
 Ball.prototype.changeBallYDirection = function(){
@@ -133,6 +129,8 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
 
 // ==============SKETCH
 
+var start_positon = true
+
 function setup() {
   // createCanvas(w,h)
   // 'height' is variable in P5 that is set to the canvas' height
@@ -150,6 +148,9 @@ function draw() {
   // ellipse(x,y,w,[h])
   // background(R, G, B)
   background(105,105,105)
+  if(start_positon){
+
+  }
   paddle.update()
   ball.update()
   // paddle_line.update(paddle, paddle_width, mouseX, mouseY)
@@ -173,15 +174,6 @@ function draw() {
     }
   }
 
-  // fill("red")
-  // ellipseMode(RADIUS)
-  // ellipse(mouseX, mouseY, 20)
-  // stroke("red")
-
-  // if(ballCollideWithPaddle(mouseX, mouseY, 20, paddle.x, paddle.y)){
-  //   console.log("hitting")
-  // }
-
   // if ball hits left or right wall
   if(ballCollideWithWall(ball.x, ball.radius, width)){
     console.log("hit l or r")
@@ -192,7 +184,6 @@ function draw() {
   if(ballCollideWithWall(ball.y, ball.radius, height)){
     console.log("hit f or c")
     ball.changeBallYDirection()
-    // debugger
     ball.changeBallAngle(15)
   }
 
@@ -201,7 +192,7 @@ function draw() {
 
 // KEEP AN EYE OUT FOR CONFLICTS BETWEEN COLLISION DETECTION LOGIC WITH WALL
 // AND THE CHANGE IN Y THAT BALL.CHANGEBALLANGLE PRODUCES. THE CHANGE IN Y
-// COULD INVOKE THE ballCollideWithWall METHOD 
+// COULD INVOKE THE ballCollideWithWall METHOD
 
 
 // draw paddle
