@@ -1,6 +1,6 @@
 
 // ==========PADDLE SETUP
-var speed = 10
+var speed = 6
 var paddle_full_width = 200
 var paddle_edges_width = 25
 var paddle_center_areas_width= 50
@@ -38,9 +38,9 @@ Paddle.prototype.update = function(){
 const ball_start_x = 300
 const ball_start_y = 300
 const ball_radius = 10
-var ball_change_x = 4
+var ball_change_x = 0
 var sqr_ball_change_x = ball_change_x**2
-var ball_change_y = 7
+var ball_change_y = 9
 var sqr_ball_change_y = ball_change_y**2
 var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
 
@@ -100,16 +100,17 @@ BallToPaddleLine.prototype.render = function(){
   line(this.x1, this.y1, this.x2, this.y2)
 }
 
-BallToPaddleLine.prototype.update = function(paddle, paddle_width, ball_x_pos, ball_y_pos, edge){
+BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_pos, ball_y_pos, edge){
   this.x1 = ball_x_pos
   this.y1 = ball_y_pos
-  if(ball_x_pos<=paddle.x){
-    this.x2 = paddle.x
-  }else if(ball_x_pos>=paddle.x+paddle_width-1){
-    this.x2 = paddle.x + paddle_width-1
+  if(ball_x_pos<=paddle_min_x){
+    this.x2 = paddle_min_x
+  }else if(ball_x_pos>=paddle_max_x){
+    this.x2 = paddle_max_x
   }else{
     this.x2 = ball_x_pos
   }
+
   if(edge){
     if(ball_y_pos>=paddle.y){
       this.y2 = ball_y_pos
@@ -137,7 +138,7 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
 
 // ==============SKETCH
 
-// var start_positon = true
+var hit_paddle = false
 
 function setup() {
   // createCanvas(w,h)
@@ -147,6 +148,10 @@ function setup() {
   paddle = new Paddle(paddle_x, height-40, paddle_full_width)
   ball = new Ball(ball_start_x, ball_start_y, ball_radius)
   ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
+  ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
+  ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
+  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
+  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
 }
 
 // draw() continuously executes the code in the block until program stops
@@ -156,13 +161,21 @@ function draw() {
   // ellipse(x,y,w,[h])
   // background(R, G, B)
   background(105,105,105)
-
+  hit_paddle = false
   paddle.update()
   ball.update()
-  ball_to_center_paddle_line.update(paddle, paddle_center_areas_width, ball.x, ball.y)
+  ball_to_center_paddle_line.update(paddle_x, paddle_x + paddle_center_areas_width, ball.x, ball.y)
+  ball_to_LEFT_paddle_line.update(paddle_x-paddle_center_areas_width, paddle_x -1, ball.x, ball.y)
+  ball_to_RIGHT_paddle_line.update(paddle_x+paddle_center_areas_width+1, paddle_x+(paddle_center_areas_width*2), ball.x, ball.y)
+  ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y)
+  ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y)
   paddle.display()
   ball.display()
   ball_to_center_paddle_line.render()
+  ball_to_LEFT_paddle_line.render()
+  ball_to_RIGHT_paddle_line.render()
+  ball_to_LCORNER_paddle_line.render()
+  ball_to_RCORNER_paddle_line.render()
 
   if(keyIsDown(LEFT_ARROW)){
     if(paddle_x <= 0){
@@ -193,10 +206,43 @@ function draw() {
     // ball.changeBallAngle(15)
   }
 
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2)){
+  // WHEN BALL HITS CENTER AREA OF PADDLE
+  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
     console.log("hitting paddle")
+    hit_paddle = true
     ball.changeBallYDirection()
-    ball.changeBallAngle(15)
+    ball.changeBallAngle(90)
+  }
+
+  // WHEN BALL HITS CENTER, LEFT AREA OF PADDLE
+  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
+    console.log("success")
+    hit_paddle = true
+    ball.changeBallYDirection()
+    ball.changeBallAngle(135)
+  }
+
+  // WHEN BALL HITS CENTER, RIGHT AREA OF PADDLE
+  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !hit_paddle){
+    hit_paddle = true
+    ball.changeBallYDirection()
+    ball.changeBallAngle(45)
+  }
+
+  // WHEN BALL HITS LEFT CORNER OF PADDLE
+  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
+    console.log("hit corner")
+    hit_paddle = true
+    ball.changeBallYDirection()
+    ball.changeBallAngle(150)
+  }
+
+  //  WHEN BALL HITS RIGHT CORDER OF PADDLE
+  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
+    console.log("hit corner")
+    hit_paddle = true
+    ball.changeBallYDirection()
+    ball.changeBallAngle(30)
   }
 
   // if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, point_x, point_y))
