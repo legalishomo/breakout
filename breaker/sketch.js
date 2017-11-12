@@ -164,10 +164,29 @@ function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
   }
 }
 
+function ballHitFloor(circle_y, circle_radius, canvas_height){
+  if(circle_y + circle_radius >= canvas_height){
+    return true
+  }
+}
+
+function ballHitCeiling(circle_y, circle_radius){
+  if(circle_y - circle_radius <= 0){
+    return true
+  }
+}
+
 // ==============SKETCH
 
 var hit_paddle = false
 var blocks = {}
+var game_over = false
+
+function restart(ball){
+  ball.x = ball_start_x
+  ball.y = ball_start_y
+  paddle_x = 350 - (paddle_center_areas_width/2)
+}
 
 function setup() {
   // createCanvas(w,h)
@@ -256,11 +275,15 @@ function draw() {
     ball.changeBallXDirection()
   }
 
-  // if ball hits ceiling or floor
-  if(ballCollideWithWall(ball.y, ball.radius, height)){
+  // if ball hits ceiling
+  if(ballHitCeiling(ball.y, ball.radius)){
     ball.changeBallYDirection()
   }
 
+  // if ball hits floor
+  if(ballHitFloor(ball.y, ball.radius, height)){
+    restart(ball)
+  }
   // IF BALL HITS CENTER AREA OF PADDLE
   if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
     hit_paddle = true
