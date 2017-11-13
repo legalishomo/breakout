@@ -180,7 +180,6 @@ function ballHitCeiling(circle_y, circle_radius){
 
 var hit_paddle = false
 var blocks = {}
-var game_over = false
 var start_position = true
 var line_start_x = 350
 var line_start_y = 500
@@ -191,6 +190,10 @@ function restart(ball){
   ball.x = ball_start_x
   ball.y = ball_start_y
   paddle_x = 350 - (paddle_center_areas_width/2)
+  paddle.x = paddle_x
+  line_start_x = 350
+  line_start_y = 500
+  start_line_angle = 90
 }
 
 function setup() {
@@ -225,6 +228,14 @@ function setup() {
 
 }
 
+function keyPressed(){
+  if (keyCode == SHIFT && start_position == true){
+    ball.change_y = -(sin(start_line_angle) * ball_delta_distance)
+    ball.change_x = cos(start_line_angle) * ball_delta_distance
+    start_position = false
+  }
+}
+
 // draw() continuously executes the code in the block until program stops
 // to not loop, call noLoop() in the setUp() function
 function draw() {
@@ -245,7 +256,7 @@ function draw() {
 
   if(start_position){
     stroke(220,220,220)
-    strokeWeight(2)
+    strokeWeight(4)
     line(ball_start_x, ball_start_y, line_start_x, line_start_y)
     fill(105,105,105)
     noStroke()
@@ -278,6 +289,7 @@ function draw() {
         console.log(start_line_angle)
       }
     }
+
   }else{
     paddle.update()
     ball.update()
@@ -324,6 +336,7 @@ function draw() {
     // if ball hits floor
     if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
       restart(ball)
+      start_position = true
     }
     // IF BALL HITS CENTER AREA OF PADDLE
     if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
