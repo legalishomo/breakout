@@ -6,7 +6,7 @@ html, body {
 .main-container{
   height: 100%;
   width: 100%;
-  background-color: black;
+  background-color: #679490;
 }
 
 
@@ -34,7 +34,43 @@ html, body {
 
 
 .modal-content{
-  background-color: white;
+  background-image: url("../images/breaker_welcome_screen.png");
+  background-size: cover;
   width: 900px;
   height: 700px;
+}
+
+button{
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-decoration: inherit;
+  vertical-align: inherit;
+  box-sizing: inherit;
+  background: transparent;
+}
+#start-button{
+  position: absolute;
+  top: 450px;
+  left: 743px;
+  background-color: #679490;
+  width: 325px;
+  height: 50px;
+  text-align: center;
+  font-family: "Arial";
+  letter-spacing: 1px;
+  color:white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#start-button:hover{
+  background-color: #249490;
 }
