@@ -1,0 +1,14 @@
+html, body {
+  height: 100%;
+}
+
+
+.main-container{
+  height: 100%;
+  width: 100%;
+  background-image: url("../images/maroon.jpg");
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
