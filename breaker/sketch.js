@@ -37,10 +37,10 @@ Paddle.prototype.update = function(){
 
 const ball_start_x = 300
 const ball_start_y = 300
-const ball_radius = 10
+const ball_radius = 11
 var ball_change_x = 0
 var sqr_ball_change_x = ball_change_x**2
-var ball_change_y = 9
+var ball_change_y = 10
 var sqr_ball_change_y = ball_change_y**2
 var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
 
@@ -57,7 +57,7 @@ function Ball(x, y, radius){
 
 Ball.prototype.display = function(){
   noStroke()
-  fill("white")
+  fill("black")
   ellipseMode(RADIUS)
   ellipse(this.x, this.y, this.radius)
 }
@@ -181,6 +181,7 @@ function ballHitCeiling(circle_y, circle_radius){
 var hit_paddle = false
 var blocks = {}
 var game_over = false
+var start_position = true
 
 function restart(ball){
   ball.x = ball_start_x
@@ -272,6 +273,7 @@ function draw() {
 
   // if ball hits left or right wall
   if(ballCollideWithWall(ball.x, ball.radius, width)){
+    console.log(ball.x)
     ball.changeBallXDirection()
   }
 
@@ -281,7 +283,7 @@ function draw() {
   }
 
   // if ball hits floor
-  if(ballHitFloor(ball.y, ball.radius, height)){
+  if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
     restart(ball)
   }
   // IF BALL HITS CENTER AREA OF PADDLE
