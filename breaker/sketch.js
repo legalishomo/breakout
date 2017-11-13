@@ -305,10 +305,12 @@ function draw() {
   })
 
   Object.values(game.blocks).forEach((block)=>{
-    if(block.wasHit(ball.x, ball.y, ball.diameter) && !hit_block){
-      hit_block = true
-      ball.changeBallYDirection()
-      block.remove(game)
+    if(!hit_block){
+      if(block.wasHit(ball.x, ball.y, ball.diameter)){
+        hit_block = true
+        ball.changeBallYDirection()
+        block.remove(game)
+      }
     }
   })
 

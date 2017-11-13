@@ -7,14 +7,23 @@
     <script src="./addons/p5.dom.min.js"></script>
     <script src="./addons/p5.sound.min.js"></script>
     <script src="./addons/p5.collide2d.min.js"></script>
-    <script src="./breaker/sketch.js"></script>
     <link rel="stylesheet" href="./breaker/style.css">
   </head>
   <body>
     <div class="main-container">
-      <section id="canvas-area">
+      <div id="modal">
+        <div class="modal-content">
+          <h1>Hello</h1>
+          <button id="start-button">Start</button>
+        </div>
+      </div>
 
+      <section id="canvas-area">
+        <!-- canvas goes here -->
       </section>
+
+      <script src="./breaker/sketch.js"></script>
+      <script src="./breaker/modal.js"></script>
     </div>
   </body>
 </html>
