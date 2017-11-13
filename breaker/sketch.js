@@ -253,22 +253,30 @@ function draw() {
     ball.display()
     paddle.display()
     if(keyIsDown(65)){
-      start_line_angle += 1
-      new_angle = (start_line_angle) * (Math.PI / 180)
-      x_length = Math.cos(new_angle) * start_line_length
-      line_start_x = 350 + x_length
-      y_length = Math.sin(new_angle) * start_line_length
-      line_start_y = (500 +start_line_length) - y_length
-      console.log(start_line_angle)
+      if(start_line_angle>=165){
+        return
+      }else{
+        start_line_angle += 1
+        new_angle = (start_line_angle) * (Math.PI / 180)
+        x_length = Math.cos(new_angle) * start_line_length
+        line_start_x = 350 + x_length
+        y_length = Math.sin(new_angle) * start_line_length
+        line_start_y = (500 +start_line_length) - y_length
+        console.log(start_line_angle)
+      }
     }
     if(keyIsDown(68)){
-      start_line_angle -= 1
-      new_angle = (start_line_angle) * (Math.PI/180)
-      x_length = Math.cos(new_angle) * start_line_length
-      line_start_x = 350 + x_length
-      y_length = Math.sin(new_angle) * start_line_length
-      line_start_y = (500+start_line_length) - y_length
-      console.log(start_line_angle)
+      if(start_line_angle<=15){
+        return
+      } else{
+        start_line_angle -= 1
+        new_angle = (start_line_angle) * (Math.PI/180)
+        x_length = Math.cos(new_angle) * start_line_length
+        line_start_x = 350 + x_length
+        y_length = Math.sin(new_angle) * start_line_length
+        line_start_y = (500+start_line_length) - y_length
+        console.log(start_line_angle)
+      }
     }
   }else{
     paddle.update()
