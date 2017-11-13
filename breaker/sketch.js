@@ -35,8 +35,8 @@ Paddle.prototype.update = function(){
 
 // ========BALL setup
 
-const ball_start_x = 300
-const ball_start_y = 300
+const ball_start_x = 350
+const ball_start_y = 700 - 55
 const ball_radius = 11
 var ball_change_x = 0
 var sqr_ball_change_x = ball_change_x**2
@@ -182,6 +182,10 @@ var hit_paddle = false
 var blocks = {}
 var game_over = false
 var start_position = true
+var line_start_x = 350
+var line_start_y = 500
+var start_line_angle = 90
+var start_line_length;
 
 function restart(ball){
   ball.x = ball_start_x
@@ -194,6 +198,8 @@ function setup() {
   // 'height' is variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
   createCanvas(700, 700)
+  start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
+
   paddle = new Paddle(paddle_x, height-40, paddle_full_width)
   ball = new Ball(ball_start_x, ball_start_y, ball_radius)
   ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
@@ -225,20 +231,6 @@ function draw() {
   // background(R, G, B)
   background(105,105,105)
   hit_paddle = false
-  paddle.update()
-  ball.update()
-  ball_to_center_paddle_line.update(paddle_x, paddle_x + paddle_center_areas_width, ball.x, ball.y)
-  ball_to_LEFT_paddle_line.update(paddle_x-paddle_center_areas_width, paddle_x -1, ball.x, ball.y)
-  ball_to_RIGHT_paddle_line.update(paddle_x+paddle_center_areas_width+1, paddle_x+(paddle_center_areas_width*2), ball.x, ball.y)
-  ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y, edge=true)
-  ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y, edge=true)
-  paddle.display()
-  ball.display()
-  ball_to_center_paddle_line.render()
-  ball_to_LEFT_paddle_line.render()
-  ball_to_RIGHT_paddle_line.render()
-  ball_to_LCORNER_paddle_line.render()
-  ball_to_RCORNER_paddle_line.render()
 
   Object.values(blocks).forEach((block)=>{
     block.display()
@@ -251,74 +243,115 @@ function draw() {
     }
   })
 
-
-
-  if(keyIsDown(LEFT_ARROW)){
-    if(paddle_x <= (paddle_center_areas_width + paddle_edges_width)){
-      paddle_x
-    } else {
-      paddle_x -= speed
+  if(start_position){
+    stroke(220,220,220)
+    strokeWeight(2)
+    line(ball_start_x, ball_start_y, line_start_x, line_start_y)
+    fill(105,105,105)
+    noStroke()
+    ellipse(ball_start_x, ball_start_y, ball.radius + 10)
+    ball.display()
+    paddle.display()
+    if(keyIsDown(65)){
+      start_line_angle += 1
+      new_angle = (start_line_angle) * (Math.PI / 180)
+      x_length = Math.cos(new_angle) * start_line_length
+      line_start_x = 350 + x_length
+      y_length = Math.sin(new_angle) * start_line_length
+      line_start_y = (500 +start_line_length) - y_length
+      console.log(start_line_angle)
     }
-  }
-
-  if(keyIsDown(RIGHT_ARROW)){
-    if(paddle_x >= width - ((paddle_center_areas_width*2)+paddle_edges_width)){
-      paddle_x
-    }else{
-      paddle_x += speed
+    if(keyIsDown(68)){
+      start_line_angle -= 1
+      new_angle = (start_line_angle) * (Math.PI/180)
+      x_length = Math.cos(new_angle) * start_line_length
+      line_start_x = 350 + x_length
+      y_length = Math.sin(new_angle) * start_line_length
+      line_start_y = (500+start_line_length) - y_length
+      console.log(start_line_angle)
     }
-  }
+  }else{
+    paddle.update()
+    ball.update()
+    ball_to_center_paddle_line.update(paddle_x, paddle_x + paddle_center_areas_width, ball.x, ball.y)
+    ball_to_LEFT_paddle_line.update(paddle_x-paddle_center_areas_width, paddle_x -1, ball.x, ball.y)
+    ball_to_RIGHT_paddle_line.update(paddle_x+paddle_center_areas_width+1, paddle_x+(paddle_center_areas_width*2), ball.x, ball.y)
+    ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y, edge=true)
+    ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y, edge=true)
+    paddle.display()
+    ball.display()
+    ball_to_center_paddle_line.render()
+    ball_to_LEFT_paddle_line.render()
+    ball_to_RIGHT_paddle_line.render()
+    ball_to_LCORNER_paddle_line.render()
+    ball_to_RCORNER_paddle_line.render()
 
+    if(keyIsDown(LEFT_ARROW)){
+      if(paddle_x <= (paddle_center_areas_width + paddle_edges_width)){
+        paddle_x
+      } else {
+        paddle_x -= speed
+      }
+    }
 
+    if(keyIsDown(RIGHT_ARROW)){
+      if(paddle_x >= width - ((paddle_center_areas_width*2)+paddle_edges_width)){
+        paddle_x
+      }else{
+        paddle_x += speed
+      }
+    }
 
-  // if ball hits left or right wall
-  if(ballCollideWithWall(ball.x, ball.radius, width)){
-    console.log(ball.x)
-    ball.changeBallXDirection()
-  }
+    // if ball hits left or right wall
+    if(ballCollideWithWall(ball.x, ball.radius, width)){
+      console.log(ball.x)
+      ball.changeBallXDirection()
+    }
 
-  // if ball hits ceiling
-  if(ballHitCeiling(ball.y, ball.radius)){
-    ball.changeBallYDirection()
-  }
+    // if ball hits ceiling
+    if(ballHitCeiling(ball.y, ball.radius)){
+      ball.changeBallYDirection()
+    }
 
-  // if ball hits floor
-  if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
-    restart(ball)
-  }
-  // IF BALL HITS CENTER AREA OF PADDLE
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
-    hit_paddle = true
-    ball.changeBallYDirection()
-    ball.changeBallAngle(90)
-  }
+    // if ball hits floor
+    if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
+      restart(ball)
+    }
+    // IF BALL HITS CENTER AREA OF PADDLE
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
+      hit_paddle = true
+      ball.changeBallYDirection()
+      ball.changeBallAngle(90)
+    }
 
-  // IF BALL HITS CENTER, LEFT AREA OF PADDLE
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
-    hit_paddle = true
-    ball.changeBallYDirection()
-    ball.changeBallAngle(135)
-  }
+    // IF BALL HITS CENTER, LEFT AREA OF PADDLE
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
+      hit_paddle = true
+      ball.changeBallYDirection()
+      ball.changeBallAngle(135)
+    }
 
-  // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !hit_paddle){
-    hit_paddle = true
-    ball.changeBallYDirection()
-    ball.changeBallAngle(45)
-  }
+    // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !hit_paddle){
+      hit_paddle = true
+      ball.changeBallYDirection()
+      ball.changeBallAngle(45)
+    }
 
-  // IF BALL HITS LEFT CORNER OF PADDLE
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
-    hit_paddle = true
-    ball.changeBallYDirection()
-    ball.changeBallAngle(150)
-  }
+    // IF BALL HITS LEFT CORNER OF PADDLE
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
+      hit_paddle = true
+      ball.changeBallYDirection()
+      ball.changeBallAngle(150)
+    }
 
-  //  IF BALL HITS RIGHT CORNER OF PADDLE
-  if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
-    hit_paddle = true
-    ball.changeBallYDirection()
-    ball.changeBallAngle(30)
+    //  IF BALL HITS RIGHT CORNER OF PADDLE
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
+      hit_paddle = true
+      ball.changeBallYDirection()
+      ball.changeBallAngle(30)
+    }
+
   }
 
 }
