@@ -122,8 +122,8 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
 
 // ===============BLOCK
 
-var block_width = 116
-var block_height = 50
+var block_width = 93.75
+var block_height = 30
   // rect(x, y, w, h)
 function Block(x,y,w,h,i){
   this.x = x
@@ -181,6 +181,7 @@ function ballHitCeiling(circle_y, circle_radius){
 // ==============GAME CLASS
 
 var hit_paddle = false
+var hit_block = false
 var start_position = true
 var line_start_x = 350
 var line_start_y = 500
@@ -206,11 +207,11 @@ Game.prototype.createBlocks = function(){
   let start_y = 40
   let h_count = 0
   let margin = 10
-  for(i=0; i<20; i++){
+  for(i=0; i<40; i++){
     this.blocks[i] = new Block(start_x, start_y, block_width, block_height, i)
     start_x += (block_width + margin)
     h_count += 1
-    if(h_count == 5){
+    if(h_count == 8){
       h_count = 0
       start_x = 40
       start_y += (block_height + margin)
@@ -274,7 +275,7 @@ function setup() {
   // createCanvas(w,h)
   // 'height' is variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
-  var canvas = createCanvas(700, 700)
+  var canvas = createCanvas(900, 700)
   canvas.parent('canvas-area');
   start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
 
@@ -297,13 +298,15 @@ function draw() {
   // background(R, G, B)
   background(105,105,105)
   hit_paddle = false
+  hit_block = false
 
   Object.values(game.blocks).forEach((block)=>{
     block.display()
   })
 
   Object.values(game.blocks).forEach((block)=>{
-    if(block.wasHit(ball.x, ball.y, ball.diameter)){
+    if(block.wasHit(ball.x, ball.y, ball.diameter) && !hit_block){
+      hit_block = true
       ball.changeBallYDirection()
       block.remove(game)
     }
@@ -355,7 +358,7 @@ function draw() {
     }
 
     // if ball hits floor
-    if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
+    if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > width){
       game.restart(ball, paddle)
       start_position = true
     }
