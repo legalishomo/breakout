@@ -274,7 +274,7 @@ function setup() {
   // createCanvas(w,h)
   // 'height' is variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
-  var canvas = createCanvas(900, 700)
+  var canvas = createCanvas(700, 700)
   canvas.parent('canvas-area');
   start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
 
