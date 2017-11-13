@@ -6,7 +6,8 @@ html, body {
 .main-container{
   height: 100%;
   width: 100%;
-  background-image: url("../images/maroon.jpg");
+  /*background-image: url("../images/maroon.jpg");,*/
+  background-color: black;
   margin: 0;
   display: flex;
   justify-content: center;

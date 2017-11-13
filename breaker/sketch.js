@@ -144,8 +144,8 @@ Block.prototype.wasHit = function(ball_x, ball_y, ball_diameter){
   return collideRectCircle(this.x, this.y, this.width, this.height, ball_x, ball_y, ball_diameter)
 }
 
-Block.prototype.remove = function(){
-  delete blocks[this.index]
+Block.prototype.remove = function(game){
+  delete game.blocks[this.index]
 }
 
 
@@ -176,17 +176,22 @@ function ballHitCeiling(circle_y, circle_radius){
   }
 }
 
-// ==============SKETCH
+
+
+// ==============GAME CLASS
 
 var hit_paddle = false
-var blocks = {}
 var start_position = true
 var line_start_x = 350
 var line_start_y = 500
 var start_line_angle = 90
 var start_line_length;
 
-function restart(ball){
+function Game(){
+  this.blocks = {}
+}
+
+Game.prototype.restart = function(ball, paddle){
   ball.x = ball_start_x
   ball.y = ball_start_y
   paddle_x = 350 - (paddle_center_areas_width/2)
@@ -196,28 +201,13 @@ function restart(ball){
   start_line_angle = 90
 }
 
-function setup() {
-  // createCanvas(w,h)
-  // 'height' is variable in P5 that is set to the canvas' height
-  angleMode(DEGREES)
-  var canvas = createCanvas(700, 700)
-  canvas.parent('canvas-area');
-  start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
-
-  paddle = new Paddle(paddle_x, height-40, paddle_full_width)
-  ball = new Ball(ball_start_x, ball_start_y, ball_radius)
-  ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
-  ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
-  ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
-  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
-  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
-
+Game.prototype.createBlocks = function(){
   let start_x = 40
   let start_y = 40
   let h_count = 0
   let margin = 10
   for(i=0; i<20; i++){
-    blocks[i] = new Block(start_x, start_y, block_width, block_height, i)
+    this.blocks[i] = new Block(start_x, start_y, block_width, block_height, i)
     start_x += (block_width + margin)
     h_count += 1
     if(h_count == 5){
@@ -226,16 +216,80 @@ function setup() {
       start_y += (block_height + margin)
     }
   }
-
 }
 
+Game.prototype.setStartPosition = function(){
+  stroke(220,220,220)
+  strokeWeight(4)
+  line(ball_start_x, ball_start_y, line_start_x, line_start_y)
+  fill(105,105,105)
+  noStroke()
+  ellipse(ball_start_x, ball_start_y, ball.radius + 10)
+  ball.display()
+  paddle.display()
+  if(keyIsDown(65)){
+    if(start_line_angle>=165){
+      return
+    }else{
+      start_line_angle += 1
+      new_angle = (start_line_angle) * (Math.PI / 180)
+      x_length = Math.cos(new_angle) * start_line_length
+      line_start_x = 350 + x_length
+      y_length = Math.sin(new_angle) * start_line_length
+      line_start_y = (500 +start_line_length) - y_length
+      console.log(start_line_angle)
+    }
+  }
+  if(keyIsDown(68)){
+    if(start_line_angle<=15){
+      return
+    } else{
+      start_line_angle -= 1
+      new_angle = (start_line_angle) * (Math.PI/180)
+      x_length = Math.cos(new_angle) * start_line_length
+      line_start_x = 350 + x_length
+      y_length = Math.sin(new_angle) * start_line_length
+      line_start_y = (500+start_line_length) - y_length
+      console.log(start_line_angle)
+    }
+  }
+}
+
+
+
+
+// function that listens for keys pressed
 function keyPressed(){
-  if (keyCode == SHIFT && start_position == true){
+  if (keyCode == UP_ARROW && start_position == true){
     ball.change_y = -(sin(start_line_angle) * ball_delta_distance)
     ball.change_x = cos(start_line_angle) * ball_delta_distance
     start_position = false
   }
 }
+
+
+// ==============SKETCH
+
+function setup() {
+  // createCanvas(w,h)
+  // 'height' is variable in P5 that is set to the canvas' height
+  angleMode(DEGREES)
+  var canvas = createCanvas(900, 700)
+  canvas.parent('canvas-area');
+  start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
+
+  game = new Game()
+  paddle = new Paddle(paddle_x, height-40, paddle_full_width)
+  ball = new Ball(ball_start_x, ball_start_y, ball_radius)
+  ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
+  ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
+  ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
+  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
+  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
+
+  game.createBlocks()
+}
+
 
 // draw() continuously executes the code in the block until program stops
 // to not loop, call noLoop() in the setUp() function
@@ -244,53 +298,19 @@ function draw() {
   background(105,105,105)
   hit_paddle = false
 
-  Object.values(blocks).forEach((block)=>{
+  Object.values(game.blocks).forEach((block)=>{
     block.display()
   })
 
-  Object.values(blocks).forEach((block)=>{
+  Object.values(game.blocks).forEach((block)=>{
     if(block.wasHit(ball.x, ball.y, ball.diameter)){
       ball.changeBallYDirection()
-      block.remove()
+      block.remove(game)
     }
   })
 
   if(start_position){
-    stroke(220,220,220)
-    strokeWeight(4)
-    line(ball_start_x, ball_start_y, line_start_x, line_start_y)
-    fill(105,105,105)
-    noStroke()
-    ellipse(ball_start_x, ball_start_y, ball.radius + 10)
-    ball.display()
-    paddle.display()
-    if(keyIsDown(65)){
-      if(start_line_angle>=165){
-        return
-      }else{
-        start_line_angle += 1
-        new_angle = (start_line_angle) * (Math.PI / 180)
-        x_length = Math.cos(new_angle) * start_line_length
-        line_start_x = 350 + x_length
-        y_length = Math.sin(new_angle) * start_line_length
-        line_start_y = (500 +start_line_length) - y_length
-        console.log(start_line_angle)
-      }
-    }
-    if(keyIsDown(68)){
-      if(start_line_angle<=15){
-        return
-      } else{
-        start_line_angle -= 1
-        new_angle = (start_line_angle) * (Math.PI/180)
-        x_length = Math.cos(new_angle) * start_line_length
-        line_start_x = 350 + x_length
-        y_length = Math.sin(new_angle) * start_line_length
-        line_start_y = (500+start_line_length) - y_length
-        console.log(start_line_angle)
-      }
-    }
-
+    game.setStartPosition()
   }else{
     paddle.update()
     ball.update()
@@ -336,7 +356,7 @@ function draw() {
 
     // if ball hits floor
     if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > 700){
-      restart(ball)
+      game.restart(ball, paddle)
       start_position = true
     }
     // IF BALL HITS CENTER AREA OF PADDLE
