@@ -186,6 +186,7 @@ var start_position = true
 var line_start_x = 350
 var line_start_y = 500
 var start_line_angle = 90
+var ball_count = 3
 var start_line_length;
 
 function Game(){
@@ -253,6 +254,19 @@ Game.prototype.setStartPosition = function(){
       line_start_y = (500+start_line_length) - y_length
       console.log(start_line_angle)
     }
+  }
+}
+
+Game.prototype.subtractBall = function(){
+  if(ball_count == 2){
+    let ball1 = select('#ball-1')
+    ball1.removeClass("ball")
+  }else if(ball_count == 1){
+    let ball2 = select('#ball-2')
+    ball2.removeClass("ball")
+  }else if(ball_count == 0){
+    let ball3 = select('#ball-3')
+    ball3.removeClass("ball")
   }
 }
 
@@ -362,6 +376,8 @@ function draw() {
     // if ball hits floor
     if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > width){
       game.restart(ball, paddle)
+      ball_count -= 1
+      game.subtractBall()
       start_position = true
     }
     // IF BALL HITS CENTER AREA OF PADDLE
