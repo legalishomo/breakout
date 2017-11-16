@@ -151,6 +151,7 @@ Block.prototype.remove = function(game){
 
 // =========UTILITY
 
+// Implementing a 'nearest point' algorithm
 function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point_y){
   let distance_between_points = dist(circle_x, circle_y, point_x, point_y)
   if(distance_between_points <= circle_radius){
@@ -178,6 +179,56 @@ function ballHitCeiling(circle_y, circle_radius){
 
 
 
+//=============LEVEL TWO BOSS
+
+function LevelTwoBoss(x,y,w,h){
+  this.lifepoints = 100
+  this.x = x
+  this.y = y
+  this.width = w
+  this.height = h
+  this.change_x = 5
+  this.side_hit_count = 0
+}
+
+LevelTwoBoss.prototype.display = function(){
+  noStroke()
+  fill("red")
+  rect(this.x, this.y, this.width, this.height)
+}
+
+LevelTwoBoss.prototype.move = function(){
+  this.x += this.change_x
+}
+
+LevelTwoBoss.prototype.loseLife = function(){
+  this.lifepoints -= 5
+}
+
+LevelTwoBoss.prototype.checkForWallCollision = function(){
+  if(this.x >= width - this.width || this.x <= 0){
+    this.change_x = -(this.change_x)
+    this.side_hit_count = 0
+  }
+}
+
+LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
+  if(collideLineCircle(this.x, this.y, this.x, this.y + this.height, ball.x, ball.y, ball.radius*2) || collideLineCircle(this.x+this.width, this.y, this.x+this.width, this.y + this.height, ball.x, ball.y, ball.radius*2)){
+    ball.changeBallXDirection()
+    if(this.side_hit_count == 0){
+      this.change_x = -(this.change_x)
+    }
+    this.side_hit_count += 1
+  }
+}
+
+LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
+  if(collideLineCircle(this.x, this.y, this.x+this.width, this.y, ball.x, ball.y, ball.radius*2) || collideLineCircle(this.x, this.y+this.height, this.x+this.width, this.y + this.height, ball.x, ball.y, ball.radius*2)){
+    ball.changeBallYDirection()
+  }
+}
+
+
 // ==============GAME CLASS
 
 var hit_paddle = false
@@ -186,11 +237,15 @@ var start_position = true
 var line_start_x = 350
 var line_start_y = 500
 var start_line_angle = 90
-var ball_count = 3
+var ball_count = 4
 var start_line_length;
+var game_over = false;
+var show_directions_on_start = true;
 
 function Game(){
   this.blocks = {}
+  this.score = 000
+  this.level = 2
 }
 
 Game.prototype.restart = function(ball, paddle){
@@ -258,28 +313,93 @@ Game.prototype.setStartPosition = function(){
 }
 
 Game.prototype.subtractBall = function(){
-  if(ball_count == 2){
+  if(ball_count == 3){
     let ball1 = select('#ball-1')
     ball1.removeClass("ball")
-  }else if(ball_count == 1){
+  }else if(ball_count == 2){
     let ball2 = select('#ball-2')
     ball2.removeClass("ball")
-  }else if(ball_count == 0){
+  }else if(ball_count == 1){
     let ball3 = select('#ball-3')
     ball3.removeClass("ball")
   }
 }
 
+Game.prototype.gameOver = function(){
+  let game_over_modal = document.getElementById('game-over-modal')
+  game_over_modal.style.display = "flex";
+  noLoop()
+}
+
+Game.prototype.resetBalls = function(){
+  ball_count = 4
+  let ball1 = select('#ball-1')
+  let ball2 = select('#ball-2')
+  let ball3 = select('#ball-3')
+  ball1.addClass("ball")
+  ball2.addClass("ball")
+  ball3.addClass("ball")
+}
+
+Game.prototype.newGame = function(){
+  start_position = true
+  let game_over_modal = document.getElementById('game-over-modal')
+  let score_board = document.getElementById("score-board")
+  game_over_modal.style.display = "none";
+  this.blocks = {}
+  this.createBlocks()
+  this.score = 0
+  score_board.textContent = 0
+  this.resetBalls()
+  this.setStartPosition()
+}
+
+Game.prototype.addPoints = function(){
+  this.score += 3
+  let score_board = document.getElementById("score-board")
+
+  score_board.textContent = this.score
+}
+
+Game.prototype.completeFirstLevel = function(){
+  noLoop()
+  this.level += 1
+
+}
 
 
-
-// function that listens for keys pressed
+// function that listens for keys pressed (NOT HELD)
 function keyPressed(){
   if (keyCode == UP_ARROW && start_position == true){
     ball.change_y = -(sin(start_line_angle) * ball_delta_distance)
     ball.change_x = cos(start_line_angle) * ball_delta_distance
     start_position = false
   }
+
+  if(keyCode == 67 && game_over == true){
+    game_over = false
+    game.newGame()
+    game.restart(ball, paddle)
+    loop()
+  }
+
+  if(keyCode == 81 && game_over == true){
+    game_over = false
+    game.newGame()
+    game.restart(ball, paddle)
+    loop()
+    let canvas_area = document.getElementById('canvas-area')
+    let start_modal = document.getElementById('modal');
+    canvas_area.style.display = "none";
+    start_modal.style.display = "flex";
+  }
+
+  if((keyCode == UP_ARROW) && show_directions_on_start){
+    let infoModal = document.getElementById('info-modal')
+    infoModal.style.display = "none";
+    show_directions_on_start = false
+  }
+
 }
 
 
@@ -290,12 +410,13 @@ function setup() {
   // 'height' is variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
   var canvas = createCanvas(900, 700)
-  canvas.parent('canvas-area');
+  canvas.parent('canvas-holder');
   start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
 
   game = new Game()
   paddle = new Paddle(paddle_x, height-40, paddle_full_width)
   ball = new Ball(ball_start_x, ball_start_y, ball_radius)
+  level_two_boss = new LevelTwoBoss(0, 100, 300, 150)
   ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
   ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
   ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
@@ -314,19 +435,32 @@ function draw() {
   hit_paddle = false
   hit_block = false
 
-  Object.values(game.blocks).forEach((block)=>{
-    block.display()
-  })
+  if(game.level == 1){
+    Object.values(game.blocks).forEach((block)=>{
+      block.display()
+    })
 
-  Object.values(game.blocks).forEach((block)=>{
-    if(!hit_block){
-      if(block.wasHit(ball.x, ball.y, ball.diameter)){
-        hit_block = true
-        ball.changeBallYDirection()
-        block.remove(game)
+    Object.values(game.blocks).forEach((block)=>{
+      if(!hit_block){
+        if(block.wasHit(ball.x, ball.y, ball.diameter)){
+          hit_block = true
+          game.addPoints()
+          ball.changeBallYDirection()
+          block.remove(game)
+        }
       }
+    })
+
+    if(Object.keys(game.blocks).length==0){
+      game.completeFirstLevel()
     }
-  })
+  }else if(game.level == 2){
+    level_two_boss.move()
+    level_two_boss.display()
+    level_two_boss.checkForWallCollision()
+    level_two_boss.checkForSideCollisionWithBall(ball)
+    level_two_boss.checkForTopBottomCollision(ball)
+  }
 
   if(start_position){
     game.setStartPosition()
@@ -379,6 +513,10 @@ function draw() {
       ball_count -= 1
       game.subtractBall()
       start_position = true
+      if(ball_count == 0){
+        game_over = true
+        game.gameOver()
+      }
     }
     // IF BALL HITS CENTER AREA OF PADDLE
     if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){

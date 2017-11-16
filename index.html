@@ -8,6 +8,7 @@
     <script src="./addons/p5.sound.min.js"></script>
     <script src="./addons/p5.collide2d.min.js"></script>
     <link rel="stylesheet" href="./breaker/style.css">
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
   </head>
   <body>
     <div class="main-container">
@@ -17,20 +18,58 @@
         </div>
       </div>
 
+
       <section id="canvas-area">
-        <div class="balls-left-container">
-          <div id="ball-1" class="ball place-holder">
+
+        <div class="left-sidebar-container">
+          <div class="balls-left-container">
+            <div id="ball-1" class="ball place-holder">
+            </div>
+            <div id="ball-2" class="ball place-holder">
+            </div>
+            <div id="ball-3" class="ball place-holder">
+            </div>
           </div>
-          <div id="ball-2" class="ball place-holder">
+
+          <div class="info-button-container">
+            <div id="info-button">
+              <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+            </div>
           </div>
-          <div id="ball-3" class="ball place-holder">
+
+        </div>
+
+        <div id="info-modal">
+          <!-- <div class="info-modal-content-container"> -->
+            <div class="info-modal-content">
+              <span id="close-modal">&times;</span>
+            </div>
+          <!-- </div> -->
+        </div>
+
+        <div id="game-over-modal">
+          <div class="game-over-content">
+
           </div>
         </div>
         <!-- canvas goes here -->
-      </section>
+        <div id="canvas-holder">
 
-      <script src="./breaker/sketch.js"></script>
-      <script src="./breaker/modal.js"></script>
+        </div>
+
+
+
+        <div class="right-sidebar-container">
+          <div class="score-board-container">
+            <h1 id="score-board">0</h1>
+          </div>
+        </div>
+      </section>
     </div>
+    <section class="contact-bar-info">
+      <h1>Omar Torres</h1>
+    </section>
+    <script src="./breaker/sketch.js"></script>
+    <script src="./breaker/modal.js"></script>
   </body>
 </html>
