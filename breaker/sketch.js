@@ -189,12 +189,36 @@ function LevelTwoBoss(x,y,w,h){
   this.height = h
   this.change_x = 5
   this.side_hit_count = 0
+  this.side_was_hit = false
+  this.perimeter_x = this.x
+  this.perimeter_y = this.y+this.height
 }
 
 LevelTwoBoss.prototype.display = function(){
   noStroke()
   fill("red")
   rect(this.x, this.y, this.width, this.height)
+}
+
+LevelTwoBoss.prototype.renderCollisionDetectorLine = function(ball){
+  stroke("black")
+  strokeWeight(1)
+  if(ball.x < this.x){
+    this.perimeter_x = this.x
+  } else if(ball.x >this.x+this.width){
+    this.perimeter_x = this.x+this.width
+  }else{
+    this.perimeter_x = ball.x
+  }
+
+  if(ball.y < this.y){
+    this.perimeter_y = this.y
+  } else if (ball.y > this.y +this.height) {
+    this.perimeter_y = this.y + this.height
+  } else{
+    this.perimeter_y = ball.y
+  }
+  line(ball.x, ball.y, this.perimeter_x, this.perimeter_y)
 }
 
 LevelTwoBoss.prototype.move = function(){
@@ -212,21 +236,55 @@ LevelTwoBoss.prototype.checkForWallCollision = function(){
   }
 }
 
+LevelTwoBoss.prototype.changeXDirection = function(){
+  this.change_x = -(this.change_x)
+}
+
 LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
-  if(collideLineCircle(this.x, this.y, this.x, this.y + this.height, ball.x, ball.y, ball.radius*2) || collideLineCircle(this.x+this.width, this.y, this.x+this.width, this.y + this.height, ball.x, ball.y, ball.radius*2)){
+  // if(this.perimeter_y == this.y+this.height){
+  //   this.perimeter_y = this.perimeter_y -1
+  // } else if(this.perimeter_y == this.y){
+  //   this.perimeter_y = this.perimeter_y + 1
+  // }
+  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, this.perimeter_y)
+  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, this.perimeter_y)
+  // if(distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <=ball.radius){
+  //   if(this.side_hit_count == 0){
+  //     this.changeXDirection()
+  //     this.side_hit_count += 1
+  //   }
+  //   ball.changeBallXDirection()
+  //   this.side_was_hit = true
+  //   console.log("hit side")
+  // }
+
+
+
+  if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))){
     ball.changeBallXDirection()
+    this.side_was_hit = true
     if(this.side_hit_count == 0){
-      this.change_x = -(this.change_x)
+      this.changeXDirection()
+      this.side_hit_count += 1
     }
-    this.side_hit_count += 1
+    // console.log("hit left")
+  } else if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == 1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x)==-1))){
+    ball.changeBallXDirection()
+    this.side_was_hit = true
+    // console.log("hit right")
   }
 }
 
 LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
-  if(collideLineCircle(this.x, this.y, this.x+this.width, this.y, ball.x, ball.y, ball.radius*2) || collideLineCircle(this.x, this.y+this.height, this.x+this.width, this.y + this.height, ball.x, ball.y, ball.radius*2)){
+  let distance_between_points_TOP = dist(ball.x, ball.y, this.perimeter_x, this.y)
+  let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
+  if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     ball.changeBallYDirection()
+    console.log('hit top or bottom')
   }
 }
+
+
 
 
 // ==============GAME CLASS
@@ -455,8 +513,10 @@ function draw() {
       game.completeFirstLevel()
     }
   }else if(game.level == 2){
+    level_two_boss.side_was_hit = false
     level_two_boss.move()
     level_two_boss.display()
+    level_two_boss.renderCollisionDetectorLine(ball)
     level_two_boss.checkForWallCollision()
     level_two_boss.checkForSideCollisionWithBall(ball)
     level_two_boss.checkForTopBottomCollision(ball)
