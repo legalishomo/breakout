@@ -187,7 +187,7 @@ function LevelTwoBoss(x,y,w,h){
   this.y = y
   this.width = w
   this.height = h
-  this.change_x = 5
+  this.change_x = 3
   this.side_hit_count = 0
   this.side_was_hit = false
   this.perimeter_x = this.x
@@ -285,6 +285,18 @@ LevelTwoBoss.prototype.display_life_points = function(){
   this.setup = false
   let life_points_display = document.getElementById('score-board')
   life_points_display.textContent = this.lifepoints
+}
+
+LevelTwoBoss.prototype.checkIfDefeated = function(){
+  if(this.lifepoints == 0){
+    noLoop()
+  }
+}
+
+LevelTwoBoss.prototype.checkForHalfLife = function(){
+  if(this.lifepoints == 50){
+    this.change_x = Math.sign(this.change_x) == 1 ? 6 : -6
+  }
 }
 
 
@@ -523,6 +535,8 @@ function draw() {
     if(level_two_boss.setup == true){
       level_two_boss.display_life_points()
     }
+    level_two_boss.checkForHalfLife()
+    level_two_boss.checkIfDefeated()
     level_two_boss.renderCollisionDetectorLine(ball)
     level_two_boss.checkForWallCollision()
     level_two_boss.checkForSideCollisionWithBall(ball)
