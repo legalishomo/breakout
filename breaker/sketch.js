@@ -192,6 +192,7 @@ function LevelTwoBoss(x,y,w,h){
   this.side_was_hit = false
   this.perimeter_x = this.x
   this.perimeter_y = this.y+this.height
+  this.setup = true
 }
 
 LevelTwoBoss.prototype.display = function(){
@@ -240,6 +241,12 @@ LevelTwoBoss.prototype.changeXDirection = function(){
   this.change_x = -(this.change_x)
 }
 
+LevelTwoBoss.prototype.subtractLifePoints = function(){
+  let life_points_display = document.getElementById('score-board')
+  this.lifepoints -=5
+  life_points_display.textContent = this.lifepoints
+}
+
 LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
   // if(this.perimeter_y == this.y+this.height){
   //   this.perimeter_y = this.perimeter_y -1
@@ -248,30 +255,19 @@ LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
   // }
   let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, this.perimeter_y)
   let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, this.perimeter_y)
-  // if(distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <=ball.radius){
-  //   if(this.side_hit_count == 0){
-  //     this.changeXDirection()
-  //     this.side_hit_count += 1
-  //   }
-  //   ball.changeBallXDirection()
-  //   this.side_was_hit = true
-  //   console.log("hit side")
-  // }
-
-
 
   if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))){
     ball.changeBallXDirection()
+    this.subtractLifePoints()
+    console.log(this.lifepoints)
     this.side_was_hit = true
     if(this.side_hit_count == 0){
       this.changeXDirection()
       this.side_hit_count += 1
     }
-    // console.log("hit left")
   } else if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == 1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x)==-1))){
     ball.changeBallXDirection()
     this.side_was_hit = true
-    // console.log("hit right")
   }
 }
 
@@ -280,8 +276,15 @@ LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
   let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     ball.changeBallYDirection()
-    console.log('hit top or bottom')
+    this.subtractLifePoints()
+    console.log(this.lifepoints)
   }
+}
+
+LevelTwoBoss.prototype.display_life_points = function(){
+  this.setup = false
+  let life_points_display = document.getElementById('score-board')
+  life_points_display.textContent = this.lifepoints
 }
 
 
@@ -352,7 +355,7 @@ Game.prototype.setStartPosition = function(){
       line_start_x = 350 + x_length
       y_length = Math.sin(new_angle) * start_line_length
       line_start_y = (500 +start_line_length) - y_length
-      console.log(start_line_angle)
+      // console.log(start_line_angle)
     }
   }
   if(keyIsDown(68)){
@@ -365,7 +368,7 @@ Game.prototype.setStartPosition = function(){
       line_start_x = 350 + x_length
       y_length = Math.sin(new_angle) * start_line_length
       line_start_y = (500+start_line_length) - y_length
-      console.log(start_line_angle)
+      // console.log(start_line_angle)
     }
   }
 }
@@ -422,8 +425,9 @@ Game.prototype.addPoints = function(){
 Game.prototype.completeFirstLevel = function(){
   noLoop()
   this.level += 1
-
 }
+
+
 
 
 // function that listens for keys pressed (NOT HELD)
@@ -516,6 +520,9 @@ function draw() {
     level_two_boss.side_was_hit = false
     level_two_boss.move()
     level_two_boss.display()
+    if(level_two_boss.setup == true){
+      level_two_boss.display_life_points()
+    }
     level_two_boss.renderCollisionDetectorLine(ball)
     level_two_boss.checkForWallCollision()
     level_two_boss.checkForSideCollisionWithBall(ball)
@@ -558,7 +565,7 @@ function draw() {
 
     // if ball hits left or right wall
     if(ballCollideWithWall(ball.x, ball.radius, width)){
-      console.log(ball.x)
+      // console.log(ball.x)
       ball.changeBallXDirection()
     }
 
