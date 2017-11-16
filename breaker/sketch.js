@@ -248,14 +248,16 @@ LevelTwoBoss.prototype.subtractLifePoints = function(){
 }
 
 LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
-  // if(this.perimeter_y == this.y+this.height){
-  //   this.perimeter_y = this.perimeter_y -1
-  // } else if(this.perimeter_y == this.y){
-  //   this.perimeter_y = this.perimeter_y + 1
-  // }
-  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, this.perimeter_y)
-  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, this.perimeter_y)
-
+  let side_y_value = 0
+  if(this.perimeter_y == this.y+this.height){
+    side_y_value = this.perimeter_y - 1
+  } else if(this.perimeter_y == this.y){
+    side_y_value = this.perimeter_y + 1
+  } else {
+    side_y_value = this.perimeter_y
+  }
+  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
+  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
   if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))){
     ball.changeBallXDirection()
     this.subtractLifePoints()
@@ -318,7 +320,7 @@ var show_directions_on_start = true;
 function Game(){
   this.blocks = {}
   this.score = 000
-  this.level = 2
+  this.level = 1
 }
 
 Game.prototype.restart = function(ball, paddle){
@@ -435,7 +437,6 @@ Game.prototype.addPoints = function(){
 }
 
 Game.prototype.completeFirstLevel = function(){
-  noLoop()
   this.level += 1
 }
 
@@ -474,6 +475,36 @@ function keyPressed(){
     show_directions_on_start = false
   }
 
+}
+
+
+//===============MODAL LOGIC
+
+var modal = document.getElementById('modal');
+var canvas_area = document.getElementById('canvas-area')
+var startButton = document.getElementById('start-button')
+var infoButton = document.getElementById('info-button')
+var infoModal = document.getElementById('info-modal')
+var closeModalButton = document.getElementById("close-modal")
+
+startButton.onclick = function(){
+  modal.style.display = "none";
+  canvas_area.style.display = "flex";
+}
+
+infoButton.onclick = function(){
+  console.log("clicked")
+  infoModal.style.display = "flex";
+}
+
+closeModalButton.onclick = function() {
+    infoModal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target == infoModal) {
+        infoModal.style.display = "none";
+    }
 }
 
 
@@ -529,6 +560,7 @@ function draw() {
       game.completeFirstLevel()
     }
   }else if(game.level == 2){
+    console.log(level_two_boss.perimeter_y)
     level_two_boss.side_was_hit = false
     level_two_boss.move()
     level_two_boss.display()
