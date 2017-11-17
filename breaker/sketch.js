@@ -1,19 +1,23 @@
 
 // ==========PADDLE SETUP
-var speed = 6
-var paddle_full_width = 200
-var paddle_edges_width = 25
-var paddle_center_areas_width= 50
-// 20 - 50 - 50 - 50 - 20
-var paddle_x = 350 - (paddle_center_areas_width/2)
+new p5();
+
+const paddle_speed = 6
+const paddle_full_width = 200
+const paddle_edges_width = 25
+const paddle_center_areas_width= 50
+// 25 - 50 - 50 - 50 - 25
 const paddle_height = 20
+const canvas_width = 900;
+const canvas_height = 700;
+const paddle_start_x = 350 - (paddle_center_areas_width/2)
 
-
-function Paddle(x,y,width){
-  this.x = x
-  this.y = y
-  this.width = width
+function Paddle(){
+  this.x = paddle_start_x
+  this.y = canvas_height - 40
+  this.width = paddle_full_width
   this.height = paddle_height
+  this.speed = paddle_speed
 }
 
 Paddle.prototype.display = function(){
@@ -28,8 +32,20 @@ Paddle.prototype.display = function(){
   rect(this.x+(paddle_center_areas_width*2), this.y, paddle_edges_width, this.height)
 }
 
-Paddle.prototype.update = function(){
-  this.x = paddle_x
+Paddle.prototype.moveLeft = function(){
+  if(paddle.x <= (paddle_center_areas_width + paddle_edges_width)){
+    paddle.x
+  } else {
+    paddle.x -= this.speed
+  }
+}
+
+Paddle.prototype.moveRight = function(){
+  if(paddle.x >= canvas_width - ((paddle_center_areas_width*2)+paddle_edges_width)){
+    paddle.x
+  }else{
+    paddle.x += this.speed
+  }
 }
 
 
@@ -39,10 +55,7 @@ const ball_start_x = 350
 const ball_start_y = 700 - 55
 const ball_radius = 11
 var ball_change_x = 0
-var sqr_ball_change_x = ball_change_x**2
 var ball_change_y = 10
-var sqr_ball_change_y = ball_change_y**2
-var ball_delta_distance = Math.sqrt(sqr_ball_change_x+sqr_ball_change_y)
 
   // ellipse(x,y,w,[h])
 function Ball(x, y, radius){
@@ -52,7 +65,11 @@ function Ball(x, y, radius){
   this.diameter = radius * 2
   this.change_x = ball_change_x
   this.change_y = ball_change_y
-  this.delta_distance = ball_delta_distance
+  this.sqr_ball_change_x = ball_change_x**2
+  this.sqr_ball_change_y = ball_change_y**2
+  this.delta_distance = Math.sqrt(this.sqr_ball_change_x+this.sqr_ball_change_y)
+  this.hit_paddle = false
+  this.hit_block = false
 }
 
 Ball.prototype.display = function(){
@@ -87,12 +104,14 @@ Ball.prototype.changeBallAngle = function(angle){
   }
 }
 
+
 // LINE USED TO CONNECT BALL TO PADDLE AND DETECT COLLISION FROM POINT TO POINT
 function BallToPaddleLine(x1,y1, x2,y2){
   this.x1 = x1
   this.x2 = x2
   this.y1 = y1
   this.y2 = y2
+
 }
 
 BallToPaddleLine.prototype.render = function(){
@@ -100,7 +119,7 @@ BallToPaddleLine.prototype.render = function(){
   line(this.x1, this.y1, this.x2, this.y2)
 }
 
-BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_pos, ball_y_pos, edge){
+BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_pos, ball_y_pos, paddle, edge){
   this.x1 = ball_x_pos
   this.y1 = ball_y_pos
   if(ball_x_pos<=paddle_min_x){
@@ -115,7 +134,7 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
     if(ball_y_pos>=paddle.y){
       this.y2 = ball_y_pos
     }else{
-      this.y2 = height-40
+      this.y2 = 700-40
     }
   }
 }
@@ -125,13 +144,12 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
 var block_width = 93.75
 var block_height = 30
   // rect(x, y, w, h)
-function Block(x,y,w,h,i){
+function Block(x,y,i){
   this.x = x
   this.y = y
-  this.width = w
-  this.height = h
+  this.width = block_width
+  this.height = block_height
   this.index = i
-
 }
 
 Block.prototype.display = function(){
@@ -145,7 +163,10 @@ Block.prototype.wasHit = function(ball_x, ball_y, ball_diameter){
 }
 
 Block.prototype.remove = function(game){
+  console.log(Object.values(game.blocks))
   delete game.blocks[this.index]
+  console.log(Object.values(game.blocks))
+
 }
 
 
@@ -193,6 +214,7 @@ function LevelTwoBoss(x,y,w,h){
   this.perimeter_x = this.x
   this.perimeter_y = this.y+this.height
   this.setup = true
+  this.display_modal = true
 }
 
 LevelTwoBoss.prototype.display = function(){
@@ -248,20 +270,18 @@ LevelTwoBoss.prototype.subtractLifePoints = function(){
 }
 
 LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
-  let side_y_value = 0
+  let side_y_value = this.perimeter_y
   if(this.perimeter_y == this.y+this.height){
     side_y_value = this.perimeter_y - 1
   } else if(this.perimeter_y == this.y){
     side_y_value = this.perimeter_y + 1
-  } else {
-    side_y_value = this.perimeter_y
   }
+
   let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
   let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
   if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))){
     ball.changeBallXDirection()
     this.subtractLifePoints()
-    console.log(this.lifepoints)
     this.side_was_hit = true
     if(this.side_hit_count == 0){
       this.changeXDirection()
@@ -279,7 +299,6 @@ LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     ball.changeBallYDirection()
     this.subtractLifePoints()
-    console.log(this.lifepoints)
   }
 }
 
@@ -301,36 +320,57 @@ LevelTwoBoss.prototype.checkForHalfLife = function(){
   }
 }
 
+LevelTwoBoss.prototype.display_intro_modal = function(){
+  let intro_modal = document.getElementById('level2-modal')
+  intro_modal.style.display = "flex"
+}
+
+
+// ===================ANGLE POINTER
+const angle_pointer_start_x = 350
+const angle_pointer_start_y = 500
+const angle_pointer_start_angle = 90
+const angle_pointer_length = dist(ball_start_x, ball_start_y, angle_pointer_start_x, angle_pointer_start_y)
+
+function AnglePointer(){
+  this.x = angle_pointer_start_x
+  this.y = angle_pointer_start_y
+  this.angle = angle_pointer_start_angle
+  this.length = angle_pointer_length
+}
+
+AnglePointer.prototype.display = function(){
+  stroke(220,220,220)
+  strokeWeight(4)
+  line(ball_start_x, ball_start_y, this.x, this.y)
+}
+
 
 
 
 // ==============GAME CLASS
 
-var hit_paddle = false
-var hit_block = false
-var start_position = true
-var line_start_x = 350
-var line_start_y = 500
-var start_line_angle = 90
-var ball_count = 4
-var start_line_length;
-var game_over = false;
-var show_directions_on_start = true;
+// var hit_paddle = false
+// var hit_block = false
+// var start_position = true
+// var ball_count = 4
+// var game_over = false;
+// var show_directions_on_start = true;
 
 function Game(){
   this.blocks = {}
   this.score = 000
   this.level = 1
+  this.start_position = true
+  this.ball_count = 4
+  this.game_over = false
+  this.show_game_directions = true
 }
 
 Game.prototype.restart = function(ball, paddle){
   ball.x = ball_start_x
   ball.y = ball_start_y
-  paddle_x = 350 - (paddle_center_areas_width/2)
-  paddle.x = paddle_x
-  line_start_x = 350
-  line_start_y = 500
-  start_line_angle = 90
+  paddle.x = paddle_start_x
 }
 
 Game.prototype.createBlocks = function(){
@@ -338,8 +378,8 @@ Game.prototype.createBlocks = function(){
   let start_y = 40
   let h_count = 0
   let margin = 10
-  for(i=0; i<40; i++){
-    this.blocks[i] = new Block(start_x, start_y, block_width, block_height, i)
+  for(let i=0; i<40; i++){
+    this.blocks[i] = new Block(start_x, start_y, i)
     start_x += (block_width + margin)
     h_count += 1
     if(h_count == 8){
@@ -350,51 +390,47 @@ Game.prototype.createBlocks = function(){
   }
 }
 
-Game.prototype.setStartPosition = function(){
-  stroke(220,220,220)
-  strokeWeight(4)
-  line(ball_start_x, ball_start_y, line_start_x, line_start_y)
+Game.prototype.setStartPosition = function(angle_pointer){
+  angle_pointer.display()
   fill(105,105,105)
   noStroke()
   ellipse(ball_start_x, ball_start_y, ball.radius + 10)
   ball.display()
   paddle.display()
   if(keyIsDown(65)){
-    if(start_line_angle>=165){
+    if(angle_pointer.angle>=165){
       return
     }else{
-      start_line_angle += 1
-      new_angle = (start_line_angle) * (Math.PI / 180)
-      x_length = Math.cos(new_angle) * start_line_length
-      line_start_x = 350 + x_length
-      y_length = Math.sin(new_angle) * start_line_length
-      line_start_y = (500 +start_line_length) - y_length
-      // console.log(start_line_angle)
+      angle_pointer.angle += 1
+      let new_angle = (angle_pointer.angle) * (Math.PI / 180)
+      let x_length = Math.cos(new_angle) * angle_pointer.length
+      angle_pointer.x = 350 + x_length
+      let y_length = Math.sin(new_angle) * angle_pointer.length
+      angle_pointer.y = (500 +angle_pointer.length) - y_length
     }
   }
   if(keyIsDown(68)){
-    if(start_line_angle<=15){
+    if(angle_pointer.angle<=15){
       return
     } else{
-      start_line_angle -= 1
-      new_angle = (start_line_angle) * (Math.PI/180)
-      x_length = Math.cos(new_angle) * start_line_length
-      line_start_x = 350 + x_length
-      y_length = Math.sin(new_angle) * start_line_length
-      line_start_y = (500+start_line_length) - y_length
-      // console.log(start_line_angle)
+      angle_pointer.angle -= 1
+      let new_angle = (angle_pointer.angle) * (Math.PI/180)
+      let x_length = Math.cos(new_angle) * angle_pointer.length
+      angle_pointer.x = 350 + x_length
+      let y_length = Math.sin(new_angle) * angle_pointer.length
+      angle_pointer.y = (500+angle_pointer.length) - y_length
     }
   }
 }
 
 Game.prototype.subtractBall = function(){
-  if(ball_count == 3){
+  if(this.ball_count == 3){
     let ball1 = select('#ball-1')
     ball1.removeClass("ball")
-  }else if(ball_count == 2){
+  }else if(this.ball_count == 2){
     let ball2 = select('#ball-2')
     ball2.removeClass("ball")
-  }else if(ball_count == 1){
+  }else if(this.ball_count == 1){
     let ball3 = select('#ball-3')
     ball3.removeClass("ball")
   }
@@ -407,7 +443,7 @@ Game.prototype.gameOver = function(){
 }
 
 Game.prototype.resetBalls = function(){
-  ball_count = 4
+  this.ball_count = 4
   let ball1 = select('#ball-1')
   let ball2 = select('#ball-2')
   let ball3 = select('#ball-3')
@@ -416,8 +452,8 @@ Game.prototype.resetBalls = function(){
   ball3.addClass("ball")
 }
 
-Game.prototype.newGame = function(){
-  start_position = true
+Game.prototype.newGame = function(angle_pointer){
+  this.start_position = true
   let game_over_modal = document.getElementById('game-over-modal')
   let score_board = document.getElementById("score-board")
   game_over_modal.style.display = "none";
@@ -426,7 +462,7 @@ Game.prototype.newGame = function(){
   this.score = 0
   score_board.textContent = 0
   this.resetBalls()
-  this.setStartPosition()
+  this.setStartPosition(angle_pointer)
 }
 
 Game.prototype.addPoints = function(){
@@ -445,22 +481,22 @@ Game.prototype.completeFirstLevel = function(){
 
 // function that listens for keys pressed (NOT HELD)
 function keyPressed(){
-  if (keyCode == UP_ARROW && start_position == true){
-    ball.change_y = -(sin(start_line_angle) * ball_delta_distance)
-    ball.change_x = cos(start_line_angle) * ball_delta_distance
-    start_position = false
+  if (keyCode == UP_ARROW && game.start_position == true){
+    ball.change_y = -(sin(angle_pointer.angle) * ball.delta_distance)
+    ball.change_x = cos(angle_pointer.angle) * ball.delta_distance
+    game.start_position = false
   }
 
-  if(keyCode == 67 && game_over == true){
-    game_over = false
-    game.newGame()
+  if(keyCode == 67 && game.game_over == true){
+    game.game_over = false
+    game.newGame(angle_pointer)
     game.restart(ball, paddle)
     loop()
   }
 
-  if(keyCode == 81 && game_over == true){
-    game_over = false
-    game.newGame()
+  if(keyCode == 81 && game.game_over == true){
+    game.game_over = false
+    game.newGame(angle_pointer)
     game.restart(ball, paddle)
     loop()
     let canvas_area = document.getElementById('canvas-area')
@@ -469,10 +505,15 @@ function keyPressed(){
     start_modal.style.display = "flex";
   }
 
-  if((keyCode == UP_ARROW) && show_directions_on_start){
+  if((keyCode == UP_ARROW) && game.show_game_directions){
     let infoModal = document.getElementById('info-modal')
     infoModal.style.display = "none";
-    show_directions_on_start = false
+    game.show_game_directions = false
+  }
+
+  if(level_two_boss.display_modal == true && keyCode == 67){
+    let intro_modal = document.getElementById('level2-modal');
+    intro_modal.style.display = "none";
   }
 
 }
@@ -480,12 +521,12 @@ function keyPressed(){
 
 //===============MODAL LOGIC
 
-var modal = document.getElementById('modal');
-var canvas_area = document.getElementById('canvas-area')
-var startButton = document.getElementById('start-button')
-var infoButton = document.getElementById('info-button')
-var infoModal = document.getElementById('info-modal')
-var closeModalButton = document.getElementById("close-modal")
+const modal = document.getElementById('modal');
+const canvas_area = document.getElementById('canvas-area')
+const startButton = document.getElementById('start-button')
+const infoButton = document.getElementById('info-button')
+const infoModal = document.getElementById('info-modal')
+const closeModalButton = document.getElementById("close-modal")
 
 startButton.onclick = function(){
   modal.style.display = "none";
@@ -493,8 +534,8 @@ startButton.onclick = function(){
 }
 
 infoButton.onclick = function(){
-  console.log("clicked")
   infoModal.style.display = "flex";
+  game.show_game_directions = true
 }
 
 closeModalButton.onclick = function() {
@@ -510,25 +551,25 @@ window.onclick = function(event) {
 
 // ==============SKETCH
 
+const angle_pointer = new AnglePointer()
+const game = new Game(angle_pointer)
+const paddle = new Paddle()
+const ball = new Ball(ball_start_x, ball_start_y, ball_radius)
+const level_two_boss = new LevelTwoBoss(0, 100, 300, 150)
+const ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_start_x, canvas_height-40)
+const ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_start_x-paddle_center_areas_width, canvas_height-40)
+const ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_start_x+paddle_center_areas_width+1, canvas_height-40)
+const ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_start_x-paddle_center_areas_width-paddle_edges_width, canvas_height-40)
+const ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_start_x+(paddle_center_areas_width*2)+1, canvas_height-40)
+
+game.createBlocks()
+
 function setup() {
   // createCanvas(w,h)
   // 'height' is variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
-  var canvas = createCanvas(900, 700)
+  let canvas = createCanvas(canvas_width, canvas_height)
   canvas.parent('canvas-holder');
-  start_line_length = dist(ball_start_x, ball_start_y, line_start_x, line_start_y)
-
-  game = new Game()
-  paddle = new Paddle(paddle_x, height-40, paddle_full_width)
-  ball = new Ball(ball_start_x, ball_start_y, ball_radius)
-  level_two_boss = new LevelTwoBoss(0, 100, 300, 150)
-  ball_to_center_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x, height-40)
-  ball_to_LEFT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width, height-40)
-  ball_to_RIGHT_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+paddle_center_areas_width+1, height-40)
-  ball_to_LCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x-paddle_center_areas_width-paddle_edges_width, height-40)
-  ball_to_RCORNER_paddle_line = new BallToPaddleLine(ball_start_x, ball_start_y, paddle_x+(paddle_center_areas_width*2)+1, height-40)
-
-  game.createBlocks()
 }
 
 
@@ -537,35 +578,41 @@ function setup() {
 function draw() {
   // background(R, G, B)
   background(105,105,105)
-  hit_paddle = false
-  hit_block = false
+  ball.hit_paddle = false
+  ball.hit_block = false
 
   if(game.level == 1){
+    console.log(Object.values(game.blocks).length)
     Object.values(game.blocks).forEach((block)=>{
       block.display()
     })
 
     Object.values(game.blocks).forEach((block)=>{
-      if(!hit_block){
+      if(!ball.hit_block){
         if(block.wasHit(ball.x, ball.y, ball.diameter)){
-          hit_block = true
+          ball.hit_block = true
           game.addPoints()
           ball.changeBallYDirection()
           block.remove(game)
+          console.log(Object.values(game.blocks))
         }
       }
     })
 
     if(Object.keys(game.blocks).length==0){
       game.completeFirstLevel()
+      game.restart(ball, paddle)
+      game.resetBalls()
+      game.start_position = true
     }
+
   }else if(game.level == 2){
-    console.log(level_two_boss.perimeter_y)
     level_two_boss.side_was_hit = false
     level_two_boss.move()
     level_two_boss.display()
     if(level_two_boss.setup == true){
       level_two_boss.display_life_points()
+      level_two_boss.display_intro_modal()
     }
     level_two_boss.checkForHalfLife()
     level_two_boss.checkIfDefeated()
@@ -575,16 +622,23 @@ function draw() {
     level_two_boss.checkForTopBottomCollision(ball)
   }
 
-  if(start_position){
-    game.setStartPosition()
+  if(game.start_position){
+    game.setStartPosition(angle_pointer)
   }else{
-    paddle.update()
+    if(keyIsDown(LEFT_ARROW)){
+      paddle.moveLeft()
+    }
+
+    if(keyIsDown(RIGHT_ARROW)){
+      paddle.moveRight()
+    }
+
     ball.update()
-    ball_to_center_paddle_line.update(paddle_x, paddle_x + paddle_center_areas_width, ball.x, ball.y)
-    ball_to_LEFT_paddle_line.update(paddle_x-paddle_center_areas_width, paddle_x -1, ball.x, ball.y)
-    ball_to_RIGHT_paddle_line.update(paddle_x+paddle_center_areas_width+1, paddle_x+(paddle_center_areas_width*2), ball.x, ball.y)
-    ball_to_LCORNER_paddle_line.update(paddle_x-paddle_center_areas_width-paddle_edges_width, paddle_x-paddle_center_areas_width-1, ball.x, ball.y, edge=true)
-    ball_to_RCORNER_paddle_line.update(paddle_x+(paddle_center_areas_width*2)+1, paddle_x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y, edge=true)
+    ball_to_center_paddle_line.update(paddle.x, paddle.x + paddle_center_areas_width, ball.x, ball.y, paddle)
+    ball_to_LEFT_paddle_line.update(paddle.x-paddle_center_areas_width, paddle.x -1, ball.x, ball.y, paddle)
+    ball_to_RIGHT_paddle_line.update(paddle.x+paddle_center_areas_width+1, paddle.x+(paddle_center_areas_width*2), ball.x, ball.y, paddle)
+    ball_to_LCORNER_paddle_line.update(paddle.x-paddle_center_areas_width-paddle_edges_width, paddle.x-paddle_center_areas_width-1, ball.x, ball.y, paddle, edge=true)
+    ball_to_RCORNER_paddle_line.update(paddle.x+(paddle_center_areas_width*2)+1, paddle.x+(paddle_center_areas_width*2)+paddle_edges_width, ball.x, ball.y, paddle, edge=true)
     paddle.display()
     ball.display()
     ball_to_center_paddle_line.render()
@@ -593,24 +647,9 @@ function draw() {
     ball_to_LCORNER_paddle_line.render()
     ball_to_RCORNER_paddle_line.render()
 
-    if(keyIsDown(LEFT_ARROW)){
-      if(paddle_x <= (paddle_center_areas_width + paddle_edges_width)){
-        paddle_x
-      } else {
-        paddle_x -= speed
-      }
-    }
-
-    if(keyIsDown(RIGHT_ARROW)){
-      if(paddle_x >= width - ((paddle_center_areas_width*2)+paddle_edges_width)){
-        paddle_x
-      }else{
-        paddle_x += speed
-      }
-    }
 
     // if ball hits left or right wall
-    if(ballCollideWithWall(ball.x, ball.radius, width)){
+    if(ballCollideWithWall(ball.x, ball.radius, canvas_width)){
       // console.log(ball.x)
       ball.changeBallXDirection()
     }
@@ -621,47 +660,47 @@ function draw() {
     }
 
     // if ball hits floor
-    if(ballHitFloor(ball.y, ball.radius, height) || ball.x < 0 || ball.x > width){
+    if(ballHitFloor(ball.y, ball.radius, canvas_height) || ball.x < 0 || ball.x > canvas_width){
       game.restart(ball, paddle)
-      ball_count -= 1
+      game.ball_count -= 1
       game.subtractBall()
-      start_position = true
-      if(ball_count == 0){
-        game_over = true
+      game.start_position = true
+      if(game.ball_count == 0){
+        game.game_over = true
         game.gameOver()
       }
     }
     // IF BALL HITS CENTER AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !hit_paddle){
-      hit_paddle = true
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !ball.hit_paddle){
+      ball.hit_paddle = true
       ball.changeBallYDirection()
       ball.changeBallAngle(90)
     }
 
     // IF BALL HITS CENTER, LEFT AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !hit_paddle){
-      hit_paddle = true
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !ball.hit_paddle){
+      ball.hit_paddle = true
       ball.changeBallYDirection()
       ball.changeBallAngle(135)
     }
 
     // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !hit_paddle){
-      hit_paddle = true
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !ball.hit_paddle){
+      ball.hit_paddle = true
       ball.changeBallYDirection()
       ball.changeBallAngle(45)
     }
 
     // IF BALL HITS LEFT CORNER OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !hit_paddle){
-      hit_paddle = true
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !ball.hit_paddle){
+      ball.hit_paddle = true
       ball.changeBallYDirection()
       ball.changeBallAngle(150)
     }
 
     //  IF BALL HITS RIGHT CORNER OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !hit_paddle){
-      hit_paddle = true
+    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !ball.hit_paddle){
+      ball.hit_paddle = true
       ball.changeBallYDirection()
       ball.changeBallAngle(30)
     }
