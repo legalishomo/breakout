@@ -219,7 +219,7 @@ function LevelTwoBoss(x,y,w,h){
 
 LevelTwoBoss.prototype.display = function(){
   noStroke()
-  fill("red")
+  fill("#CF284A")
   rect(this.x, this.y, this.width, this.height)
 }
 
@@ -360,7 +360,7 @@ AnglePointer.prototype.display = function(){
 function Game(){
   this.blocks = {}
   this.score = 000
-  this.level = 1
+  this.level = 2
   this.start_position = true
   this.ball_count = 4
   this.game_over = false
@@ -511,7 +511,7 @@ function keyPressed(){
     game.show_game_directions = false
   }
 
-  if(level_two_boss.display_modal == true && keyCode == 67){
+  if(level_two_boss.display_modal == true && (keyCode == 67 || keyCode == UP_ARROW)){
     let intro_modal = document.getElementById('level2-modal');
     intro_modal.style.display = "none";
   }
