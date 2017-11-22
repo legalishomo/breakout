@@ -223,3 +223,22 @@ canvas{
   height: 400px;
   background-size: cover;
 }
+
+#you-won-modal{
+  display: none;
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.you-won-modal-content{
+  background-image: url("../images/breaker_youwon.png");
+  width: 500px;
+  height: 400px;
+  background-size: cover;
+}

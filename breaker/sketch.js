@@ -224,8 +224,7 @@ LevelTwoBoss.prototype.display = function(){
 }
 
 LevelTwoBoss.prototype.renderCollisionDetectorLine = function(ball){
-  stroke("black")
-  strokeWeight(1)
+  noStroke()
   if(ball.x < this.x){
     this.perimeter_x = this.x
   } else if(ball.x >this.x+this.width){
@@ -310,6 +309,8 @@ LevelTwoBoss.prototype.display_life_points = function(){
 
 LevelTwoBoss.prototype.checkIfDefeated = function(){
   if(this.lifepoints == 0){
+    let you_won_modal = document.getElementById('you-won-modal')
+    you_won_modal.style.display = "flex"
     noLoop()
   }
 }
@@ -360,7 +361,7 @@ AnglePointer.prototype.display = function(){
 function Game(){
   this.blocks = {}
   this.score = 000
-  this.level = 2
+  this.level = 1
   this.start_position = true
   this.ball_count = 4
   this.game_over = false
