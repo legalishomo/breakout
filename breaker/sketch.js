@@ -149,7 +149,12 @@ function Block(x,y,i){
   this.y = y
   this.width = block_width
   this.height = block_height
+  this.perimeter_x = this.x
+  this.perimeter_y = this.y + this.height
   this.index = i
+  this.side_was_hit = false
+  this.top_or_bottom_was_hit = false
+  this.had_item = false
 }
 
 Block.prototype.display = function(){
@@ -163,11 +168,61 @@ Block.prototype.wasHit = function(ball_x, ball_y, ball_diameter){
 }
 
 Block.prototype.remove = function(game){
-  console.log(Object.values(game.blocks))
+  // console.log(Object.values(game.blocks))
   delete game.blocks[this.index]
-  console.log(Object.values(game.blocks))
+  // console.log(Object.values(game.blocks))
+}
+
+Block.prototype.renderCollisionDetectorLine= function(ball){
+  // stroke("black")
+  // strokeWeight(1)
+  noStroke()
+  if(ball.x < this.x){
+    this.perimeter_x = this.x
+  } else if(ball.x >this.x+this.width){
+    this.perimeter_x = this.x+this.width
+  }else{
+    this.perimeter_x = ball.x
+  }
+
+  if(ball.y < this.y){
+    this.perimeter_y = this.y
+  } else if (ball.y > this.y +this.height) {
+    this.perimeter_y = this.y + this.height
+  } else{
+    this.perimeter_y = ball.y
+  }
+  line(ball.x, ball.y, this.perimeter_x, this.perimeter_y)
+}
+
+Block.prototype.checkForSideCollisionWithBall = function(ball){
+  let side_y_value = this.perimeter_y
+  if(this.perimeter_y == this.y+this.height){
+    side_y_value = this.perimeter_y - 1
+  } else if(this.perimeter_y == this.y){
+    side_y_value = this.perimeter_y + 1
+  }
+
+  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
+  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
+  if( (distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <= ball.radius) && !this.top_or_bottom_was_hit){
+    this.side_was_hit = true
+    console.log("hit side of block")
+    return true
+  }
 
 }
+
+Block.prototype.checkForTopBottomCollision = function(ball){
+  let distance_between_points_TOP = dist(ball.x, ball.y, this.perimeter_x, this.y)
+  let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
+  if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
+    this.top_or_bottom_was_hit = true
+    console.log("hit top or bottom of block")
+    return true
+  }
+}
+
 
 
 // =========UTILITY
@@ -211,6 +266,7 @@ function LevelTwoBoss(x,y,w,h){
   this.change_x = 3
   this.side_hit_count = 0
   this.side_was_hit = false
+  this.top_or_bottom_was_hit = false
   this.perimeter_x = this.x
   this.perimeter_y = this.y+this.height
   this.setup = true
@@ -278,7 +334,7 @@ LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
 
   let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
   let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
-  if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))){
+  if( (((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))) && !this.top_or_bottom_was_hit){
     ball.changeBallXDirection()
     this.subtractLifePoints()
     this.side_was_hit = true
@@ -286,7 +342,7 @@ LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
       this.changeXDirection()
       this.side_hit_count += 1
     }
-  } else if( ((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == 1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x)==-1))){
+  } else if( (((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == 1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x)==-1))) && !this.top_or_bottom_was_hit){
     ball.changeBallXDirection()
     this.side_was_hit = true
   }
@@ -298,6 +354,7 @@ LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     ball.changeBallYDirection()
     this.subtractLifePoints()
+    this.top_or_bottom_was_hit = true
   }
 }
 
@@ -366,6 +423,8 @@ function Game(){
   this.ball_count = 4
   this.game_over = false
   this.show_game_directions = true
+  this.set_items_randomly = true
+  this.items_indices = []
 }
 
 Game.prototype.restart = function(ball, paddle){
@@ -477,7 +536,18 @@ Game.prototype.completeFirstLevel = function(){
   this.level += 1
 }
 
-
+Game.prototype.generateRandomIndices = function(num){
+  if(num > this.blocks){return -1}
+  let num_blocks = Object.keys(this.blocks).length
+  let random_indices = []
+  while(random_indices.length < num){
+    let random_idx = Math.floor(Math.random() * num_blocks)
+    if(!random_indices.includes(random_idx)){
+      random_indices.push(random_idx)
+    }
+  }
+  return random_indices
+}
 
 
 // function that listens for keys pressed (NOT HELD)
@@ -583,19 +653,33 @@ function draw() {
   ball.hit_block = false
 
   if(game.level == 1){
-    console.log(Object.values(game.blocks).length)
+
+    if(game.set_items_randomly){
+      game.items_indices = game.generateRandomIndices(4)
+      game.set_items_randomly = false
+    }
+    // console.log(Object.values(game.blocks).length)
     Object.values(game.blocks).forEach((block)=>{
       block.display()
+      block.side_was_hit = false
+      block.top_or_bottom_was_hit = false
+      block.renderCollisionDetectorLine(ball)
     })
 
-    Object.values(game.blocks).forEach((block)=>{
+    Object.values(game.blocks).some((block)=>{
       if(!ball.hit_block){
-        if(block.wasHit(ball.x, ball.y, ball.diameter)){
+        if(block.checkForTopBottomCollision(ball)){
           ball.hit_block = true
-          game.addPoints()
           ball.changeBallYDirection()
+          game.addPoints()
           block.remove(game)
-          console.log(Object.values(game.blocks))
+          return true
+        } else if(block.checkForSideCollisionWithBall(ball)){
+          ball.hit_block = true
+          ball.changeBallXDirection()
+          game.addPoints()
+          block.remove(game)
+          return true
         }
       }
     })
@@ -609,6 +693,7 @@ function draw() {
 
   }else if(game.level == 2){
     level_two_boss.side_was_hit = false
+    level_two_boss.top_or_bottom_was_hit = false
     level_two_boss.move()
     level_two_boss.display()
     if(level_two_boss.setup == true){
