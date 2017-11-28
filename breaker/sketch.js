@@ -53,9 +53,9 @@ Paddle.prototype.moveRight = function(){
 
 const ball_start_x = 350
 const ball_start_y = 700 - 55
-const ball_radius = 11
+const ball_radius = 10
 var ball_change_x = 0
-var ball_change_y = 10
+var ball_change_y = 9
 
   // ellipse(x,y,w,[h])
 function Ball(x, y, radius){
@@ -154,7 +154,8 @@ function Block(x,y,i){
   this.index = i
   this.side_was_hit = false
   this.top_or_bottom_was_hit = false
-  this.had_item = false
+  this.has_item = false
+  this.item = null
 }
 
 Block.prototype.display = function(){
@@ -207,7 +208,6 @@ Block.prototype.checkForSideCollisionWithBall = function(ball){
   let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
   if( (distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <= ball.radius) && !this.top_or_bottom_was_hit){
     this.side_was_hit = true
-    console.log("hit side of block")
     return true
   }
 
@@ -218,10 +218,44 @@ Block.prototype.checkForTopBottomCollision = function(ball){
   let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     this.top_or_bottom_was_hit = true
-    console.log("hit top or bottom of block")
     return true
   }
 }
+
+Block.prototype.addItem = function(item){
+  this.item = item
+}
+
+
+
+// MAGNET POWERUP
+
+const magnet_width =  30
+const magnet_height = 15
+const item_change_y = 4
+
+function Magnet(x,y){
+  this.x = x
+  this.y = y
+  this.width = magnet_width
+  this.height = magnet_height
+  this.change_y = item_change_y
+  this.reveal = false
+}
+
+
+Magnet.prototype.render = function(){
+  noStroke()
+  fill("blue")
+  rect(this.x, this.y, this.width, this.height)
+}
+
+Magnet.prototype.updatePosition = function(){
+  if(this.reveal){
+    this.y += this.change_y
+  }
+}
+
 
 
 
@@ -230,9 +264,31 @@ Block.prototype.checkForTopBottomCollision = function(ball){
 // Implementing a 'nearest point' algorithm
 function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point_y){
   let distance_between_points = dist(circle_x, circle_y, point_x, point_y)
-  if(distance_between_points <= circle_radius){
+  if(distance_between_points <= (circle_radius)){
+    // console.log(circle_y)
+    // console.log(circle_x)
+    // console.log(point_y)
+    // console.log(distance_between_points)
+    // console.log(circle_radius)
     return true
   }
+  //
+  // if(distance_between_points >= (circle_radius) && distance_between_points<=(circle_radius+5)){
+  //   console.log(circle_y)
+  //   console.log(circle_x)
+  //   console.log(point_y)
+  //   console.log(distance_between_points)
+  //   console.log(circle_radius)
+  //   return true
+  // }
+
+  // if((circle_y) >= (point_y - 15) && circle_y <= (point_y - circle_radius)){
+  //   console.log(circle_y)
+  //   console.log(point_y)
+  //   console.log(distance_between_points)
+  //   console.log(circle_radius)
+  //   return true
+  // }
 }
 
 function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
@@ -425,6 +481,7 @@ function Game(){
   this.show_game_directions = true
   this.set_items_randomly = true
   this.items_indices = []
+  this.visible_items = []
 }
 
 Game.prototype.restart = function(ball, paddle){
@@ -656,6 +713,17 @@ function draw() {
 
     if(game.set_items_randomly){
       game.items_indices = game.generateRandomIndices(4)
+      // let index = 0
+      Object.values(game.blocks).forEach((block)=>{
+        if(game.items_indices.includes(block.index)){
+          block.has_item = true
+          // if(index%2 == 0){
+            let magnet = new Magnet(block.x+(block.width/2), block.y+(block.height/2))
+            block.addItem(magnet)
+          // }
+          // index += 1
+        }
+      })
       game.set_items_randomly = false
     }
     // console.log(Object.values(game.blocks).length)
@@ -672,6 +740,13 @@ function draw() {
           ball.hit_block = true
           ball.changeBallYDirection()
           game.addPoints()
+          if(block.has_item){
+            block.item.reveal = true
+            game.visible_items.push(block.item)
+          }
+          if(block.has_item){
+            console.log("has item")
+          }
           block.remove(game)
           return true
         } else if(block.checkForSideCollisionWithBall(ball)){
@@ -679,6 +754,9 @@ function draw() {
           ball.changeBallXDirection()
           game.addPoints()
           block.remove(game)
+          if(block.has_item){
+            console.log("has item")
+          }
           return true
         }
       }
@@ -733,6 +811,12 @@ function draw() {
     ball_to_LCORNER_paddle_line.render()
     ball_to_RCORNER_paddle_line.render()
 
+    if(game.visible_items.length != 0){
+      game.visible_items.forEach((item)=>{
+        item.updatePosition()
+        item.render()
+      })
+    }
 
     // if ball hits left or right wall
     if(ballCollideWithWall(ball.x, ball.radius, canvas_width)){
