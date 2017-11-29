@@ -7,6 +7,7 @@ const paddle_full_width = 200
 const paddle_edges_width = 25
 const paddle_center_areas_width= 50
 // 25 - 50 - 50 - 50 - 25
+
 const paddle_height = 20
 const canvas_width = 900;
 const canvas_height = 700;
@@ -18,17 +19,27 @@ function Paddle(){
   this.width = paddle_full_width
   this.height = paddle_height
   this.speed = paddle_speed
+  this.has_power_up = false
+  this.power_up_type = null
+  this.stroke_color = "black"
+  this.edge_fills = "red"
+  this.center_fills = "black"
 }
 
 Paddle.prototype.display = function(){
-  noStroke()
-  fill("white")
+  strokeWeight(5)
+  stroke(this.stroke_color)
+  fill(this.edge_fills)
   // rectMode(RADIUS) sets the x, y of rect() to now be the center point of the rectangle
   // and the w,h to be half of the rect()'s width and height
   rect(this.x-paddle_center_areas_width-paddle_edges_width, this.y, paddle_edges_width, this.height)
+  stroke(this.stroke_color)
+  fill(this.center_fills)
   rect(this.x-paddle_center_areas_width, this.y, paddle_center_areas_width, this.height)
   rect(this.x, this.y, paddle_center_areas_width, this.height)
   rect(this.x+paddle_center_areas_width, this.y, paddle_center_areas_width,this.height)
+  stroke(this.stroke_color)
+  fill(this.edge_fills)
   rect(this.x+(paddle_center_areas_width*2), this.y, paddle_edges_width, this.height)
 }
 
@@ -46,6 +57,19 @@ Paddle.prototype.moveRight = function(){
   }else{
     paddle.x += this.speed
   }
+}
+
+Paddle.prototype.add_power_up = function(item){
+  this.has_power_up = true
+  this.power_up_type = item
+  if(item == "magnet"){
+    this.center_fills = "blue"
+  }
+  setTimeout(()=>{
+    this.center_fills = "black"
+    this.has_power_up = false
+    this.power_up_type = null
+  }, 10000)
 }
 
 
@@ -159,7 +183,8 @@ function Block(x,y,i){
 }
 
 Block.prototype.display = function(){
-  noStroke()
+  strokeWeight(6)
+  stroke("black")
   fill("white")
   rect(this.x, this.y, this.width, this.height)
 }
@@ -204,18 +229,19 @@ Block.prototype.checkForSideCollisionWithBall = function(ball){
     side_y_value = this.perimeter_y + 1
   }
 
-  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
-  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
+  let distance_between_points_LEFT = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.x, side_y_value)
+  let distance_between_points_RIGHT = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.x+this.width, side_y_value)
   if( (distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <= ball.radius) && !this.top_or_bottom_was_hit){
     this.side_was_hit = true
+    debugger
     return true
   }
 
 }
 
 Block.prototype.checkForTopBottomCollision = function(ball){
-  let distance_between_points_TOP = dist(ball.x, ball.y, this.perimeter_x, this.y)
-  let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
+  let distance_between_points_TOP = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.perimeter_x, this.y)
+  let distance_between_points_BOTTOM = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.perimeter_x, this.y+this.height)
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     this.top_or_bottom_was_hit = true
     return true
@@ -227,22 +253,55 @@ Block.prototype.addItem = function(item){
 }
 
 
-
-// MAGNET POWERUP
-
-const magnet_width =  30
-const magnet_height = 15
+// ITEM CLASS
+const item_width =  30
+const item_height = 15
 const item_change_y = 4
 
-function Magnet(x,y){
+function Item(x,y,i,type){
   this.x = x
   this.y = y
-  this.width = magnet_width
-  this.height = magnet_height
+  this.width = item_width
+  this.height = item_height
   this.change_y = item_change_y
   this.reveal = false
+  this.index  = i
+  this.type = type
 }
 
+Item.prototype.checkForCollisionWithPaddle = function(paddle){
+  let paddle_x = paddle.x - paddle_center_areas_width-paddle_edges_width
+  if (this.x < paddle_x + paddle.width && this.x + this.width > paddle_x &&
+   this.y < paddle.y + paddle.height && this.height + this.y > paddle.y) {
+     console.log("item hit paddle")
+     paddle.add_power_up(this.type)
+     return true
+  }
+}
+
+Item.prototype.checkIfHitFloor = function(){
+  if(this.y+this.height >= canvas_height){
+    return true
+  }
+}
+
+Item.prototype.updatePosition = function(){
+  if(this.reveal){
+    this.y += this.change_y
+  }
+}
+
+Item.prototype.removeFromGame = function(game){
+  delete game.visible_items[this.index]
+}
+
+// MAGNET POWERUP
+function Magnet(x,y,i){
+  Item.call(this, x, y, i, "magnet")
+}
+
+Magnet.prototype = Object.create(Item.prototype);
+Magnet.prototype.constructor = Magnet
 
 Magnet.prototype.render = function(){
   noStroke()
@@ -250,28 +309,25 @@ Magnet.prototype.render = function(){
   rect(this.x, this.y, this.width, this.height)
 }
 
-Magnet.prototype.updatePosition = function(){
-  if(this.reveal){
-    this.y += this.change_y
-  }
-}
-
-
-
 
 // =========UTILITY
 
 // Implementing a 'nearest point' algorithm
-function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point_y){
-  let distance_between_points = dist(circle_x, circle_y, point_x, point_y)
-  if(distance_between_points <= (circle_radius)){
-    // console.log(circle_y)
-    // console.log(circle_x)
-    // console.log(point_y)
-    // console.log(distance_between_points)
-    // console.log(circle_radius)
+function ballCollideWithPaddle(ball, point_x, point_y){
+  let distance_between_points = dist(ball.x, ball.y, point_x, point_y)
+  if(dist(ball.x+ball.change_x, ball.y+ball.change_y, point_x, point_y) <= ball.radius){
+    console.log(ball.x)
+    console.log(ball.y)
+    console.log(point_x)
+    console.log(point_y)
+    console.log(distance_between_points)
+    console.log(ball.radius)
+    console.log("greeater")
     return true
   }
+  // if(distance_between_points <= (ball.radius)){
+  //   return true
+  // }
   //
   // if(distance_between_points >= (circle_radius) && distance_between_points<=(circle_radius+5)){
   //   console.log(circle_y)
@@ -291,8 +347,8 @@ function ballCollideWithPaddle(circle_x, circle_y, circle_radius, point_x, point
   // }
 }
 
-function ballCollideWithWall(circle_axis, circle_radius, canvas_dimension){
-  if(circle_axis-circle_radius <=0 || circle_axis >= canvas_dimension-circle_radius){
+function ballCollideWithWall(ball, canvas_dimension){
+  if((ball.x + ball.change_x)-ball.radius <=0 || (ball.x +ball.change_x)>= canvas_dimension-ball.radius){
     return true
   }
 }
@@ -451,6 +507,7 @@ function AnglePointer(){
   this.y = angle_pointer_start_y
   this.angle = angle_pointer_start_angle
   this.length = angle_pointer_length
+  this.render_for_magnet = false
 }
 
 AnglePointer.prototype.display = function(){
@@ -458,6 +515,13 @@ AnglePointer.prototype.display = function(){
   strokeWeight(4)
   line(ball_start_x, ball_start_y, this.x, this.y)
 }
+
+AnglePointer.prototype.displayForMagnet = function(ball_x){
+  stroke(220,220,220)
+  strokeWeight(4)
+  line(ball_x, ball_start_y, this.x, this.y)
+}
+
 
 
 
@@ -481,7 +545,11 @@ function Game(){
   this.show_game_directions = true
   this.set_items_randomly = true
   this.items_indices = []
-  this.visible_items = []
+  this.visible_items = {}
+}
+
+Game.prototype.addItem = function(item){
+  this.visible_items[item.index] = item
 }
 
 Game.prototype.restart = function(ball, paddle){
@@ -507,8 +575,15 @@ Game.prototype.createBlocks = function(){
   }
 }
 
-Game.prototype.setStartPosition = function(angle_pointer){
-  angle_pointer.display()
+Game.prototype.setStartPosition = function(angle_pointer, ball_x){
+  let angle_start_x = angle_pointer_start_x
+  if(angle_pointer.render_for_magnet){
+    angle_start_x = ball_x
+    angle_pointer.displayForMagnet(ball_x)
+  }else{
+    angle_pointer.display()
+  }
+
   fill(105,105,105)
   noStroke()
   ellipse(ball_start_x, ball_start_y, ball.radius + 10)
@@ -521,7 +596,7 @@ Game.prototype.setStartPosition = function(angle_pointer){
       angle_pointer.angle += 1
       let new_angle = (angle_pointer.angle) * (Math.PI / 180)
       let x_length = Math.cos(new_angle) * angle_pointer.length
-      angle_pointer.x = 350 + x_length
+      angle_pointer.x = angle_start_x + x_length
       let y_length = Math.sin(new_angle) * angle_pointer.length
       angle_pointer.y = (500 +angle_pointer.length) - y_length
     }
@@ -533,7 +608,7 @@ Game.prototype.setStartPosition = function(angle_pointer){
       angle_pointer.angle -= 1
       let new_angle = (angle_pointer.angle) * (Math.PI/180)
       let x_length = Math.cos(new_angle) * angle_pointer.length
-      angle_pointer.x = 350 + x_length
+      angle_pointer.x = angle_start_x + x_length
       let y_length = Math.sin(new_angle) * angle_pointer.length
       angle_pointer.y = (500+angle_pointer.length) - y_length
     }
@@ -603,6 +678,7 @@ Game.prototype.generateRandomIndices = function(num){
       random_indices.push(random_idx)
     }
   }
+  this.items_indices = random_indices
   return random_indices
 }
 
@@ -718,7 +794,7 @@ function draw() {
         if(game.items_indices.includes(block.index)){
           block.has_item = true
           // if(index%2 == 0){
-            let magnet = new Magnet(block.x+(block.width/2), block.y+(block.height/2))
+            let magnet = new Magnet(block.x+(block.width/2), block.y+(block.height/2), block.index)
             block.addItem(magnet)
           // }
           // index += 1
@@ -742,7 +818,7 @@ function draw() {
           game.addPoints()
           if(block.has_item){
             block.item.reveal = true
-            game.visible_items.push(block.item)
+            game.addItem(block.item)
           }
           if(block.has_item){
             console.log("has item")
@@ -787,7 +863,11 @@ function draw() {
   }
 
   if(game.start_position){
-    game.setStartPosition(angle_pointer)
+    if(angle_pointer.render_for_magnet){
+      game.setStartPosition(angle_pointer, ball.x)
+    }else{
+      game.setStartPosition(angle_pointer)
+    }
   }else{
     if(keyIsDown(LEFT_ARROW)){
       paddle.moveLeft()
@@ -811,15 +891,20 @@ function draw() {
     ball_to_LCORNER_paddle_line.render()
     ball_to_RCORNER_paddle_line.render()
 
-    if(game.visible_items.length != 0){
-      game.visible_items.forEach((item)=>{
-        item.updatePosition()
-        item.render()
+    let items_array = Object.values(game.visible_items)
+    if(items_array.length != 0){
+      items_array.forEach((item)=>{
+        if(item.checkForCollisionWithPaddle(paddle) || item.checkIfHitFloor()){
+          item.removeFromGame(game)
+        }else{
+          item.updatePosition()
+          item.render()
+        }
       })
     }
 
     // if ball hits left or right wall
-    if(ballCollideWithWall(ball.x, ball.radius, canvas_width)){
+    if(ballCollideWithWall(ball, canvas_width)){
       // console.log(ball.x)
       ball.changeBallXDirection()
     }
@@ -841,38 +926,80 @@ function draw() {
       }
     }
     // IF BALL HITS CENTER AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !ball.hit_paddle){
-      ball.hit_paddle = true
-      ball.changeBallYDirection()
-      ball.changeBallAngle(90)
+    if(ballCollideWithPaddle(ball, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !ball.hit_paddle){
+      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
+        ball.hit_paddle = true
+        game.start_position = true
+        angle_pointer.render_for_magnet = true
+        angle_pointer.x = ball.x
+      }else{
+        angle_pointer.render_for_magnet = false
+        ball.hit_paddle = true
+        ball.changeBallYDirection()
+        ball.changeBallAngle(90)
+      }
     }
 
     // IF BALL HITS CENTER, LEFT AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !ball.hit_paddle){
-      ball.hit_paddle = true
-      ball.changeBallYDirection()
-      ball.changeBallAngle(135)
+    if(ballCollideWithPaddle(ball, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !ball.hit_paddle){
+      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
+        ball.hit_paddle = true
+        game.start_position = true
+        angle_pointer.render_for_magnet = true
+        angle_pointer.x = ball.x
+      }else{
+        angle_pointer.render_for_magnet = false
+        ball.hit_paddle = true
+        ball.changeBallYDirection()
+        ball.changeBallAngle(135)
+      }
+
     }
 
     // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !ball.hit_paddle){
-      ball.hit_paddle = true
-      ball.changeBallYDirection()
-      ball.changeBallAngle(45)
+    if(ballCollideWithPaddle(ball, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !ball.hit_paddle){
+      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
+        ball.hit_paddle = true
+        game.start_position = true
+        angle_pointer.render_for_magnet = true
+        angle_pointer.x = ball.x
+      }else{
+        angle_pointer.render_for_magnet = false
+        ball.hit_paddle = true
+        ball.changeBallYDirection()
+        ball.changeBallAngle(45)
+      }
     }
 
     // IF BALL HITS LEFT CORNER OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !ball.hit_paddle){
-      ball.hit_paddle = true
-      ball.changeBallYDirection()
-      ball.changeBallAngle(150)
+    if(ballCollideWithPaddle(ball, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !ball.hit_paddle){
+      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
+        ball.hit_paddle = true
+        game.start_position = true
+        angle_pointer.render_for_magnet = true
+        angle_pointer.x = ball.x
+      }else{
+        angle_pointer.render_for_magnet = false
+        ball.hit_paddle = true
+        ball.changeBallYDirection()
+        ball.changeBallAngle(150)
+      }
     }
 
     //  IF BALL HITS RIGHT CORNER OF PADDLE
-    if(ballCollideWithPaddle(ball.x, ball.y, ball.radius, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !ball.hit_paddle){
-      ball.hit_paddle = true
-      ball.changeBallYDirection()
-      ball.changeBallAngle(30)
+    if(ballCollideWithPaddle(ball, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !ball.hit_paddle){
+      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
+        ball.hit_paddle = true
+        game.start_position = true
+        angle_pointer.render_for_magnet = true
+        angle_pointer.x = ball.x
+        angle_pointer.y = angle_pointer_start_y
+      }else{
+        angle_pointer.render_for_magnet = false
+        ball.hit_paddle = true
+        ball.changeBallYDirection()
+        ball.changeBallAngle(30)
+      }
     }
 
   }
