@@ -586,7 +586,7 @@ Game.prototype.setStartPosition = function(angle_pointer, ball_x){
 
   fill(105,105,105)
   noStroke()
-  ellipse(ball_start_x, ball_start_y, ball.radius + 10)
+  ellipse(angle_start_x, ball_start_y, ball.radius + 10)
   ball.display()
   paddle.display()
   if(keyIsDown(65)){
@@ -932,6 +932,8 @@ function draw() {
         game.start_position = true
         angle_pointer.render_for_magnet = true
         angle_pointer.x = ball.x
+        angle_pointer.y = angle_pointer_start_y
+        angle_pointer.angle = angle_pointer_start_angle
       }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
@@ -947,6 +949,8 @@ function draw() {
         game.start_position = true
         angle_pointer.render_for_magnet = true
         angle_pointer.x = ball.x
+        angle_pointer.y = angle_pointer_start_y
+        angle_pointer.angle = angle_pointer_start_angle
       }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
@@ -963,6 +967,8 @@ function draw() {
         game.start_position = true
         angle_pointer.render_for_magnet = true
         angle_pointer.x = ball.x
+        angle_pointer.y = angle_pointer_start_y
+        angle_pointer.angle = angle_pointer_start_angle
       }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
@@ -978,6 +984,8 @@ function draw() {
         game.start_position = true
         angle_pointer.render_for_magnet = true
         angle_pointer.x = ball.x
+        angle_pointer.y = angle_pointer_start_y
+        angle_pointer.angle = angle_pointer_start_angle
       }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
@@ -994,6 +1002,7 @@ function draw() {
         angle_pointer.render_for_magnet = true
         angle_pointer.x = ball.x
         angle_pointer.y = angle_pointer_start_y
+        angle_pointer.angle = angle_pointer_start_angle
       }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
