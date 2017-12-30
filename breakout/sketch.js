@@ -7,7 +7,6 @@ const paddle_full_width = 200
 const paddle_edges_width = 25
 const paddle_center_areas_width= 50
 // 25 - 50 - 50 - 50 - 25
-
 const paddle_height = 20
 const canvas_width = 900;
 const canvas_height = 700;
@@ -22,23 +21,23 @@ function Paddle(){
   this.has_power_up = false
   this.power_up_type = null
   this.stroke_color = "black"
-  this.edge_fills = "red"
+  this.edge_fills = "white"
   this.center_fills = "black"
 }
 
 Paddle.prototype.display = function(){
   strokeWeight(5)
-  stroke(this.stroke_color)
+  // stroke(this.stroke_color)
   fill(this.edge_fills)
   // rectMode(RADIUS) sets the x, y of rect() to now be the center point of the rectangle
   // and the w,h to be half of the rect()'s width and height
   rect(this.x-paddle_center_areas_width-paddle_edges_width, this.y, paddle_edges_width, this.height)
-  stroke(this.stroke_color)
+  // stroke(this.stroke_color)
   fill(this.center_fills)
   rect(this.x-paddle_center_areas_width, this.y, paddle_center_areas_width, this.height)
   rect(this.x, this.y, paddle_center_areas_width, this.height)
   rect(this.x+paddle_center_areas_width, this.y, paddle_center_areas_width,this.height)
-  stroke(this.stroke_color)
+  // stroke(this.stroke_color)
   fill(this.edge_fills)
   rect(this.x+(paddle_center_areas_width*2), this.y, paddle_edges_width, this.height)
 }
@@ -140,6 +139,7 @@ function BallToPaddleLine(x1,y1, x2,y2){
 
 BallToPaddleLine.prototype.render = function(){
   noStroke()
+  // stroke("black")
   line(this.x1, this.y1, this.x2, this.y2)
 }
 
@@ -325,26 +325,7 @@ function ballCollideWithPaddle(ball, point_x, point_y){
     console.log("greeater")
     return true
   }
-  // if(distance_between_points <= (ball.radius)){
-  //   return true
-  // }
-  //
-  // if(distance_between_points >= (circle_radius) && distance_between_points<=(circle_radius+5)){
-  //   console.log(circle_y)
-  //   console.log(circle_x)
-  //   console.log(point_y)
-  //   console.log(distance_between_points)
-  //   console.log(circle_radius)
-  //   return true
-  // }
 
-  // if((circle_y) >= (point_y - 15) && circle_y <= (point_y - circle_radius)){
-  //   console.log(circle_y)
-  //   console.log(point_y)
-  //   console.log(distance_between_points)
-  //   console.log(circle_radius)
-  //   return true
-  // }
 }
 
 function ballCollideWithWall(ball, canvas_dimension){
@@ -444,8 +425,8 @@ LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
     side_y_value = this.perimeter_y + 1
   }
 
-  let distance_between_points_LEFT = dist(ball.x, ball.y, this.x, side_y_value)
-  let distance_between_points_RIGHT = dist(ball.x, ball.y, this.x+this.width, side_y_value)
+  let distance_between_points_LEFT = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.x, side_y_value)
+  let distance_between_points_RIGHT = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.x+this.width, side_y_value)
   if( (((distance_between_points_LEFT <= ball.radius) && (Math.sign(this.change_x) == -1)) || ((distance_between_points_RIGHT <= ball.radius) && (Math.sign(this.change_x) == 1))) && !this.top_or_bottom_was_hit){
     ball.changeBallXDirection()
     this.subtractLifePoints()
@@ -461,8 +442,8 @@ LevelTwoBoss.prototype.checkForSideCollisionWithBall = function(ball){
 }
 
 LevelTwoBoss.prototype.checkForTopBottomCollision = function(ball){
-  let distance_between_points_TOP = dist(ball.x, ball.y, this.perimeter_x, this.y)
-  let distance_between_points_BOTTOM = dist(ball.x, ball.y, this.perimeter_x, this.y+this.height)
+  let distance_between_points_TOP = dist(ball.x + ball.change_x, ball.y+ball.change_y, this.perimeter_x, this.y)
+  let distance_between_points_BOTTOM = dist(ball.x +ball.change_x, ball.y+ball.change_y, this.perimeter_x, this.y+this.height)
   if((distance_between_points_BOTTOM <= ball.radius || distance_between_points_TOP <=ball.radius) && !this.side_was_hit){
     ball.changeBallYDirection()
     this.subtractLifePoints()
@@ -527,13 +508,6 @@ AnglePointer.prototype.displayForMagnet = function(ball_x){
 
 
 // ==============GAME CLASS
-
-// var hit_paddle = false
-// var hit_block = false
-// var start_position = true
-// var ball_count = 4
-// var game_over = false;
-// var show_directions_on_start = true;
 
 function Game(){
   this.blocks = {}
@@ -770,7 +744,7 @@ game.createBlocks()
 
 function setup() {
   // createCanvas(w,h)
-  // 'height' is variable in P5 that is set to the canvas' height
+  // 'height' is a variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
   let canvas = createCanvas(canvas_width, canvas_height)
   canvas.parent('canvas-holder');
@@ -842,6 +816,9 @@ function draw() {
       game.completeFirstLevel()
       game.restart(ball, paddle)
       game.resetBalls()
+      angle_pointer.x = angle_pointer_start_x
+      angle_pointer.y = angle_pointer_start_y
+      angle_pointer.angle = angle_pointer_start_angle
       game.start_position = true
     }
 
@@ -905,7 +882,6 @@ function draw() {
 
     // if ball hits left or right wall
     if(ballCollideWithWall(ball, canvas_width)){
-      // console.log(ball.x)
       ball.changeBallXDirection()
     }
 
@@ -920,6 +896,9 @@ function draw() {
       game.ball_count -= 1
       game.subtractBall()
       game.start_position = true
+      angle_pointer.x = angle_pointer_start_x
+      angle_pointer.y = angle_pointer_start_y
+      angle_pointer.angle = angle_pointer_start_angle
       if(game.ball_count == 0){
         game.game_over = true
         game.gameOver()
@@ -979,51 +958,20 @@ function draw() {
 
     // IF BALL HITS LEFT CORNER OF PADDLE
     if(ballCollideWithPaddle(ball, ball_to_LCORNER_paddle_line.x2, ball_to_LCORNER_paddle_line.y2) && !ball.hit_paddle){
-      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
-        ball.hit_paddle = true
-        game.start_position = true
-        angle_pointer.render_for_magnet = true
-        angle_pointer.x = ball.x
-        angle_pointer.y = angle_pointer_start_y
-        angle_pointer.angle = angle_pointer_start_angle
-      }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
         ball.changeBallYDirection()
         ball.changeBallAngle(150)
-      }
     }
 
     //  IF BALL HITS RIGHT CORNER OF PADDLE
     if(ballCollideWithPaddle(ball, ball_to_RCORNER_paddle_line.x2, ball_to_RCORNER_paddle_line.y2) && !ball.hit_paddle){
-      if(paddle.has_power_up && paddle.power_up_type == "magnet"){
-        ball.hit_paddle = true
-        game.start_position = true
-        angle_pointer.render_for_magnet = true
-        angle_pointer.x = ball.x
-        angle_pointer.y = angle_pointer_start_y
-        angle_pointer.angle = angle_pointer_start_angle
-      }else{
         angle_pointer.render_for_magnet = false
         ball.hit_paddle = true
         ball.changeBallYDirection()
         ball.changeBallAngle(30)
-      }
     }
 
   }
 
 }
-
-// KEEP AN EYE OUT FOR CONFLICTS BETWEEN COLLISION DETECTION LOGIC WITH WALL
-// AND THE CHANGE IN Y THAT BALL.CHANGEBALLANGLE PRODUCES. THE CHANGE IN Y
-// COULD INVOKE THE ballCollideWithWall METHOD
-
-
-// draw paddle
-// get paddle to move by clicking right and left arrow keys
-// get ball to appear
-// get ball to bounce
-// get ball to bounde off paddle
-// HANDLE EDGE CASE: when ball hits edge of paddle
-// add blocks
