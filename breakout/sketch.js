@@ -14,8 +14,6 @@ const ball_to_RCORNER_paddle_line = new BallToPaddleLine(constants.ball_start_x,
 game.createBlocks()
 
 function setup() {
-  // createCanvas(w,h)
-  // 'height' is a variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
   let canvas = createCanvas(constants.canvas_width, constants.canvas_height)
   canvas.parent('canvas-holder');
@@ -170,6 +168,19 @@ function draw() {
       angle_pointer.x = constants.angle_pointer_start_x
       angle_pointer.y = constants.angle_pointer_start_y
       angle_pointer.angle = constants.angle_pointer_start_angle
+      // remove visible items from game
+      let current_items = Object.values(game.visible_items)
+      if(current_items.length != 0){
+        current_items.forEach((item)=>{
+          item.removeFromGame(game)
+        })
+      }
+
+      // remove any current power ups that the player has
+      paddle.edge_fills = "white"
+      paddle.has_power_up = false
+      paddle.power_up_type = null
+
       if(game.ball_count == 0){
         game.game_over = true
         game.gameOver()

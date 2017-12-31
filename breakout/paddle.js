@@ -13,7 +13,7 @@ function Paddle(){
 
 Paddle.prototype.display = function(){
   strokeWeight(5)
-  // stroke(this.stroke_color)
+  stroke(this.stroke_color)
   fill(this.edge_fills)
   // rectMode(RADIUS) sets the x, y of rect() to now be the center point of the rectangle
   // and the w,h to be half of the rect()'s width and height
@@ -48,10 +48,14 @@ Paddle.prototype.add_power_up = function(item){
   this.has_power_up = true
   this.power_up_type = item
   if(item == "magnet"){
-    this.center_fills = "blue"
+    // this.center_fills = "blue"
+    // this.stroke_color = "blue"
+    this.edge_fills = "blue"
   }
   setTimeout(()=>{
-    this.center_fills = "black"
+    // this.center_fills = "black"
+    // this.stroke_color = "black"
+    this.edge_fills = "white"
     this.has_power_up = false
     this.power_up_type = null
   }, 10000)

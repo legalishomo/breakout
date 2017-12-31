@@ -15,7 +15,7 @@ function keyPressed(){
 
   if(keyCode == 81 && game.game_over == true){
     game.game_over = false
-    game.newGame(angle_pointer)
+    game.newGame(angle_pointer, ball, paddle)
     game.restart(ball, paddle)
     loop()
     let canvas_area = document.getElementById('canvas-area')
