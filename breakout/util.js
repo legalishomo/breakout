@@ -1,7 +1,4 @@
 // Implementing a 'nearest point' algorithm
-var constants = require('./constants')
-
-
 const Util = {
   ballCollideWithPaddle: function(ball, point_x, point_y){
     let distance_between_points = dist(ball.x, ball.y, point_x, point_y)
@@ -32,5 +29,3 @@ const Util = {
     }
   }
 }
-
-module.exports = Util

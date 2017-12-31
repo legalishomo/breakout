@@ -1,3 +1,5 @@
+new p5();
+
 const paddle_speed = 6
 const paddle_full_width = 200
 const paddle_edges_width = 25
@@ -26,13 +28,15 @@ const angle_pointer_start_y = 500
 const angle_pointer_start_angle = 90
 const angle_pointer_length = dist(ball_start_x, ball_start_y, angle_pointer_start_x, angle_pointer_start_y)
 
-module.exports = {
+
+const constants = {
   paddle_speed: paddle_speed,
   paddle_full_width: paddle_full_width,
   paddle_edges_width: paddle_edges_width,
   paddle_center_areas_width: paddle_center_areas_width,
   paddle_height: paddle_height,
   canvas_width: canvas_width,
+  canvas_height: canvas_height,
   paddle_start_x: paddle_start_x,
   ball_start_x: ball_start_x,
   ball_start_y: ball_start_y,

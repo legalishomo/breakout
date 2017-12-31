@@ -1,5 +1,3 @@
-var constants = require('./constants')
-
 function Ball(x, y, radius){
   this.x = x
   this.y = y
@@ -45,6 +43,3 @@ Ball.prototype.changeBallAngle = function(angle){
     this.change_x = new_change_x
   }
 }
-
-
-module.exports = Ball

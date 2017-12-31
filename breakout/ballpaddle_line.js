@@ -8,7 +8,6 @@ function BallToPaddleLine(x1,y1, x2,y2){
 
 BallToPaddleLine.prototype.render = function(){
   noStroke()
-  // stroke("black")
   line(this.x1, this.y1, this.x2, this.y2)
 }
 
@@ -31,5 +30,3 @@ BallToPaddleLine.prototype.update = function(paddle_min_x, paddle_max_x, ball_x_
     }
   }
 }
-
-module.exports = BallToPaddleLine

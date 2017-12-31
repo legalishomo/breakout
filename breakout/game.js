@@ -1,6 +1,3 @@
-var constants = require('./constants');
-var Block = require('./block')
-
 function Game(){
   this.blocks = {}
   this.score = 000
@@ -21,7 +18,7 @@ Game.prototype.addItem = function(item){
 Game.prototype.restart = function(ball, paddle){
   ball.x = constants.ball_start_x
   ball.y = constants.ball_start_y
-  paddle.x = constants.constants.paddle_start_x
+  paddle.x = constants.paddle_start_x
 }
 
 Game.prototype.createBlocks = function(){
@@ -45,7 +42,7 @@ Game.prototype.setStartPosition = function(angle_pointer, ball, paddle){
   let angle_start_x = constants.angle_pointer_start_x
   if(angle_pointer.render_for_magnet){
     angle_start_x = ball.x
-    angle_pointer.displayForMagnet(ball_x)
+    angle_pointer.displayForMagnet(ball.x)
   }else{
     angle_pointer.display()
   }
@@ -110,7 +107,7 @@ Game.prototype.resetBalls = function(){
   ball3.addClass("ball")
 }
 
-Game.prototype.newGame = function(angle_pointer){
+Game.prototype.newGame = function(angle_pointer, ball, paddle){
   this.start_position = true
   let game_over_modal = document.getElementById('game-over-modal')
   let score_board = document.getElementById("score-board")
@@ -120,7 +117,7 @@ Game.prototype.newGame = function(angle_pointer){
   this.score = 0
   score_board.textContent = 0
   this.resetBalls()
-  this.setStartPosition(angle_pointer)
+  this.setStartPosition(angle_pointer, ball, paddle)
 }
 
 Game.prototype.addPoints = function(){
@@ -147,5 +144,3 @@ Game.prototype.generateRandomIndices = function(num){
   this.items_indices = random_indices
   return random_indices
 }
-
-module.exports = Game

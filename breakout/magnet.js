@@ -1,5 +1,3 @@
-var Item = require('./item')
-
 // MAGNET POWERUP
 function Magnet(x,y,i){
   Item.call(this, x, y, i, "magnet")
@@ -13,5 +11,3 @@ Magnet.prototype.render = function(){
   fill("blue")
   rect(this.x, this.y, this.width, this.height)
 }
-
-module.exports = Magnet

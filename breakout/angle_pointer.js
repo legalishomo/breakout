@@ -1,5 +1,3 @@
-var constants = require('./constants')
-
 function AnglePointer(){
   this.x = constants.angle_pointer_start_x
   this.y = constants.angle_pointer_start_y
@@ -17,7 +15,5 @@ AnglePointer.prototype.display = function(){
 AnglePointer.prototype.displayForMagnet = function(ball_x){
   stroke(220,220,220)
   strokeWeight(4)
-  line(constants.ball_x, constants.ball_start_y, this.x, this.y)
+  line(ball_x, constants.ball_start_y, this.x, this.y)
 }
-
-module.exports = AnglePointer

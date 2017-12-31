@@ -1,46 +1,3 @@
-
-// ==========PADDLE SETUP
-new p5();
-
-var constants = require('./constants')
-var Paddle = require('./paddle')
-var Ball = require('./ball')
-var BallToPaddleLine = require('./ballpaddle_line')
-var Block = require('./block')
-var Magnet = require('./magnet')
-var LevelTwoBoss = require('./leveltwo_boss')
-var AnglePointer = require('./angle_pointer')
-var Game = require('./game')
-var Util = require('./util')
-
-const modal = document.getElementById('modal');
-const canvas_area = document.getElementById('canvas-area')
-const startButton = document.getElementById('start-button')
-const infoButton = document.getElementById('info-button')
-const infoModal = document.getElementById('info-modal')
-const closeModalButton = document.getElementById("close-modal")
-
-startButton.onclick = function(){
-  modal.style.display = "none";
-  canvas_area.style.display = "flex";
-}
-
-infoButton.onclick = function(){
-  infoModal.style.display = "flex";
-  game.show_game_directions = true
-}
-
-closeModalButton.onclick = function() {
-    infoModal.style.display = "none";
-}
-
-window.onclick = function(event) {
-    if (event.target == infoModal) {
-        infoModal.style.display = "none";
-    }
-}
-
-
 // ==============SKETCH
 
 const angle_pointer = new AnglePointer()
@@ -56,57 +13,13 @@ const ball_to_RCORNER_paddle_line = new BallToPaddleLine(constants.ball_start_x,
 
 game.createBlocks()
 
-
-// function that listens for keys pressed (NOT HELD)
-function keyPressed(){
-  if (keyCode == UP_ARROW && game.start_position == true){
-    ball.change_y = -(sin(angle_pointer.angle) * ball.delta_distance)
-    ball.change_x = cos(angle_pointer.angle) * ball.delta_distance
-    game.start_position = false
-  }
-
-  if(keyCode == 67 && game.game_over == true){
-    game.game_over = false
-    game.newGame(angle_pointer)
-    game.restart(ball, paddle)
-    loop()
-  }
-
-  if(keyCode == 81 && game.game_over == true){
-    game.game_over = false
-    game.newGame(angle_pointer)
-    game.restart(ball, paddle)
-    loop()
-    let canvas_area = document.getElementById('canvas-area')
-    let start_modal = document.getElementById('modal');
-    canvas_area.style.display = "none";
-    start_modal.style.display = "flex";
-  }
-
-  if((keyCode == UP_ARROW) && game.show_game_directions){
-    let infoModal = document.getElementById('info-modal')
-    infoModal.style.display = "none";
-    game.show_game_directions = false
-  }
-
-  if(level_two_boss.display_modal == true && (keyCode == 67 || keyCode == UP_ARROW)){
-    let intro_modal = document.getElementById('level2-modal');
-    intro_modal.style.display = "none";
-  }
-
-}
-
-
 function setup() {
   // createCanvas(w,h)
   // 'height' is a variable in P5 that is set to the canvas' height
   angleMode(DEGREES)
-  debugger
   let canvas = createCanvas(constants.canvas_width, constants.canvas_height)
   canvas.parent('canvas-holder');
 }
-
-setup()
 
 
 // draw() continuously executes the code in the block until program stops
@@ -333,5 +246,3 @@ function draw() {
   }
 
 }
-
-// exports.game = game

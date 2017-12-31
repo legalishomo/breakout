@@ -1,5 +1,3 @@
-var constants = require('./constants')
-
 function Paddle(){
   this.x = constants.paddle_start_x
   this.y = constants.canvas_height - 40
@@ -58,5 +56,3 @@ Paddle.prototype.add_power_up = function(item){
     this.power_up_type = null
   }, 10000)
 }
-
-module.exports = Paddle

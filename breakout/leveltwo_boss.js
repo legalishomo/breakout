@@ -125,6 +125,3 @@ LevelTwoBoss.prototype.display_intro_modal = function(){
   let intro_modal = document.getElementById('level2-modal')
   intro_modal.style.display = "flex"
 }
-
-
-module.exports = LevelTwoBoss

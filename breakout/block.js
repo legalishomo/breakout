@@ -1,5 +1,3 @@
-var constants = require('./constants')
-
 function Block(x,y,i){
   this.x = x
   this.y = y
@@ -83,5 +81,3 @@ Block.prototype.checkForTopBottomCollision = function(ball){
 Block.prototype.addItem = function(item){
   this.item = item
 }
-
-module.exports = Block

@@ -1,6 +1,3 @@
-var constants = require('./constants')
-
-
 function Item(x,y,i,type){
   this.x = x
   this.y = y
@@ -13,7 +10,7 @@ function Item(x,y,i,type){
 }
 
 Item.prototype.checkForCollisionWithPaddle = function(paddle){
-  let paddle_x = paddle.x - constants.constants.paddle_center_areas_width-constants.constants.paddle_edges_width
+  let paddle_x = paddle.x - constants.paddle_center_areas_width-constants.paddle_edges_width
   if (this.x < paddle_x + paddle.width && this.x + this.width > paddle_x &&
    this.y < paddle.y + paddle.height && this.height + this.y > paddle.y) {
      console.log("item hit paddle")
@@ -23,7 +20,7 @@ Item.prototype.checkForCollisionWithPaddle = function(paddle){
 }
 
 Item.prototype.checkIfHitFloor = function(){
-  if(this.y+this.height >= constants.constants.canvas_height){
+  if(this.y+this.height >= constants.canvas_height){
     return true
   }
 }
@@ -37,6 +34,3 @@ Item.prototype.updatePosition = function(){
 Item.prototype.removeFromGame = function(game){
   delete game.visible_items[this.index]
 }
-
-
-module.exports = Item
