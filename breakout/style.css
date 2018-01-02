@@ -37,13 +37,13 @@ body{
 
 
 .modal-content{
-  background-image: url("../images/breaker_welcome_screen.png");
+  background-image: url("../images/breakout_welcome_screen.png");
   background-size: cover;
   width: 900px;
   height: 700px;
 }
 
-button{
+button, a{
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
@@ -62,7 +62,8 @@ button{
 #start-button{
   position: relative;
   top: 402px;
-  left: 476px;
+  left: 490px;
+  /* background-color: #D1264A; */
   background-color: #679490;
   width: 325px;
   height: 50px;
@@ -147,9 +148,29 @@ canvas{
 }
 
 .contact-bar-info{
-  position: absolute;
-  background-color: red;
+  /* position: absolute; */
+  background-color: black;
   width: 100%;
+}
+
+.info-bar-content{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width:100%;
+}
+
+.info-bar-content h1{
+  font-size: 30px;
+  margin: 30px;
+  color:white;
+  font-family: "Arial";
+}
+
+.contact-icons{
+  font-size: 40px;
+  margin: 30px;
+  color: white;
 }
 
 #info-modal{
@@ -165,7 +186,7 @@ canvas{
 }
 
 .info-modal-content{
-  background-image: url("../images/breaker_controls.png");
+  background-image: url("../images/breakout_controls.png");
   background-size: cover;
   width: 500px;
   height: 400px;
@@ -241,4 +262,39 @@ canvas{
   width: 500px;
   height: 400px;
   background-size: cover;
+}
+
+.power-ups-legend-container{
+  margin-top: 50px;
+  background-color: white;
+  padding-top: 16px;
+  padding-bottom: 1px;
+}
+
+
+.power-ups-legend-container h1, h2{
+  font-family: "Arial";
+}
+
+.power-ups-legend-container h2{
+  text-align: left;
+}
+
+#laser-legend{
+  display: inline-block;
+  background-color: red;
+  height: 15px;
+  width: 30px;
+  text-align: left;
+  margin-right: 10px;
+  margin-left: 20px;
+}
+
+#magnet-legend{
+  display: inline-block;
+  background-color: blue;
+  height: 15px;
+  width: 30px;
+  margin-right: 10px;
+  margin-left: 20px;
 }

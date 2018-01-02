@@ -67,6 +67,7 @@ Paddle.prototype.add_power_up = function(item){
       this.has_power_up = false
       this.power_up_type = null
       clearInterval(this.interval_id)
+      this.interval_id = null
     }, 10000)
   }
 }

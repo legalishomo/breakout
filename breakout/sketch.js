@@ -233,6 +233,7 @@ function draw() {
       paddle.has_power_up = false
       if(paddle.power_up_type == "laser"){
         clearInterval(paddle.interval_id)
+        paddle.interval_id = null
       }
       paddle.power_up_type = null
 
