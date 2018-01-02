@@ -23,6 +23,9 @@ const item_width =  30
 const item_height = 15
 const item_change_y = 4
 
+const laser_beam_height = 40
+const laser_beam_width = 10
+
 const angle_pointer_start_x = 350
 const angle_pointer_start_y = 500
 const angle_pointer_start_angle = 90
@@ -51,5 +54,7 @@ const constants = {
   angle_pointer_start_x: angle_pointer_start_x,
   angle_pointer_start_y: angle_pointer_start_y,
   angle_pointer_start_angle: angle_pointer_start_angle,
-  angle_pointer_length: angle_pointer_length
+  angle_pointer_length: angle_pointer_length,
+  laser_beam_width: laser_beam_width,
+  laser_beam_height: laser_beam_height
 }

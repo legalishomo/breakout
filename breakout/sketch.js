@@ -33,20 +33,24 @@ function draw() {
     // assign items to random blocks
     if(game.set_items_randomly){
       game.items_indices = game.generateRandomIndices(10)
-      // let index = 0
+      let index = 0
       Object.values(game.blocks).forEach((block)=>{
         if(game.items_indices.includes(block.index)){
           block.has_item = true
-          // if(index%2 == 0){
+          if(index%2 == 0){
             let magnet = new Magnet(block.x+(block.width/2), block.y+(block.height/2), block.index)
             block.addItem(magnet)
-          // }
-          // index += 1
+          }else{
+            let laser = new Laser(block.x+(block.width/2), block.y+(block.height/2), block.index)
+            block.addItem(laser)
+          }
+          index += 1
         }
       })
       game.set_items_randomly = false
     }
-    // console.log(Object.values(game.blocks).length)
+
+    // reset block defaults and redraw
     Object.values(game.blocks).forEach((block)=>{
       block.display()
       block.side_was_hit = false
@@ -54,6 +58,8 @@ function draw() {
       block.renderCollisionDetectorLine(ball)
     })
 
+    // check if any one of the blocks is hit by the ball
+    // once any returns true, execution of the block of code ends
     Object.values(game.blocks).some((block)=>{
       if(!ball.hit_block){
         if(block.checkForTopBottomCollision(ball)){
@@ -64,24 +70,23 @@ function draw() {
             block.item.reveal = true
             game.addItem(block.item)
           }
-          if(block.has_item){
-            console.log("has item")
-          }
           block.remove(game)
           return true
         } else if(block.checkForSideCollisionWithBall(ball)){
           ball.hit_block = true
           ball.changeBallXDirection()
           game.addPoints()
-          block.remove(game)
           if(block.has_item){
-            console.log("has item")
+            block.item.reveal = true
+            game.addItem(block.item)
           }
+          block.remove(game)
           return true
         }
       }
     })
 
+    // check to see if level 1 is complete
     if(Object.keys(game.blocks).length==0){
       game.completeFirstLevel()
       game.restart(ball, paddle)
@@ -110,9 +115,12 @@ function draw() {
   }
 
 
+  // animate falling items (movement = falling)
+  // check to see if item touches paddle
   let items_array = Object.values(game.visible_items)
   if(items_array.length != 0){
     items_array.forEach((item)=>{
+      // item.checkForCollisionWithPaddle adds power up to paddle if it returns true
       if(item.checkForCollisionWithPaddle(paddle) || item.checkIfHitFloor()){
         item.removeFromGame(game)
       }else{
@@ -122,13 +130,51 @@ function draw() {
     })
   }
 
-  if(game.start_position){
-    if(angle_pointer.render_for_magnet){
-      game.setStartPosition(angle_pointer, ball, paddle)
-    }else{
-      game.setStartPosition(angle_pointer, ball, paddle)
+  // animate/update left and right laser beams
+  if(paddle.left_laser_beams.length != 0){
+    paddle.left_laser_beams.forEach((laser_beam)=>{
+      laser_beam.render()
+      laser_beam.update()
+    })
+  }
+
+  if(paddle.right_laser_beams.length != 0){
+    paddle.right_laser_beams.forEach((laser_beam)=>{
+      laser_beam.render()
+      laser_beam.update()
+    })
+  }
+
+  // check to see if any laser beam hits any block
+  Object.values(game.blocks).forEach((block)=>{
+    if(paddle.left_laser_beams.length != 0){
+      if(paddle.left_laser_beams[0].checkIfHitBlock(block)){
+        // remove block from game
+        block.remove(game)
+        paddle.left_laser_beams.shift()
+      }else if(paddle.left_laser_beams[0].checkIfHitCeiling()){
+        paddle.left_laser_beams.shift()
+      }
     }
+    if(paddle.right_laser_beams.length != 0){
+      if(paddle.right_laser_beams[0].checkIfHitBlock(block)){
+        block.remove(game)
+        paddle.right_laser_beams.shift()
+
+      }else if(paddle.right_laser_beams[0].checkIfHitCeiling()){
+        paddle.right_laser_beams.shift()
+      }
+    }
+  })
+
+
+
+
+  // check to see if we need to be in starting position (with angle pointer)
+  if(game.start_position){
+    game.setStartPosition(angle_pointer, ball, paddle)
   }else{
+    // keys to move paddle
     if(keyIsDown(LEFT_ARROW)){
       paddle.moveLeft()
     }
@@ -137,6 +183,7 @@ function draw() {
       paddle.moveRight()
     }
 
+    // update assets
     ball.update()
     ball_to_center_paddle_line.update(paddle.x, paddle.x + constants.paddle_center_areas_width, ball.x, ball.y, paddle)
     ball_to_LEFT_paddle_line.update(paddle.x-constants.paddle_center_areas_width, paddle.x -1, ball.x, ball.y, paddle)
@@ -151,17 +198,8 @@ function draw() {
     ball_to_LCORNER_paddle_line.render()
     ball_to_RCORNER_paddle_line.render()
 
-    // let items_array = Object.values(game.visible_items)
-    // if(items_array.length != 0){
-    //   items_array.forEach((item)=>{
-    //     if(item.checkForCollisionWithPaddle(paddle) || item.checkIfHitFloor()){
-    //       item.removeFromGame(game)
-    //     }else{
-    //       item.updatePosition()
-    //       item.render()
-    //     }
-    //   })
-    // }
+
+
 
     // if ball hits left or right wall
     if(Util.ballCollideWithWall(ball, constants.canvas_width)){
@@ -193,6 +231,9 @@ function draw() {
       // remove any current power ups that the player has
       paddle.edge_fills = "white"
       paddle.has_power_up = false
+      if(paddle.power_up_type == "laser"){
+        clearInterval(paddle.interval_id)
+      }
       paddle.power_up_type = null
 
       if(game.ball_count == 0){
@@ -200,8 +241,11 @@ function draw() {
         game.gameOver()
       }
     }
+
+
     // IF BALL HITS CENTER AREA OF PADDLE
     if(Util.ballCollideWithPaddle(ball, ball_to_center_paddle_line.x2, ball_to_center_paddle_line.y2) && !ball.hit_paddle){
+      // check to see if paddle currently has a power up type "magnet"
       if(paddle.has_power_up && paddle.power_up_type == "magnet"){
         ball.y = constants.ball_start_y
         ball.hit_paddle = true
@@ -220,6 +264,7 @@ function draw() {
 
     // IF BALL HITS CENTER, LEFT AREA OF PADDLE
     if(Util.ballCollideWithPaddle(ball, ball_to_LEFT_paddle_line.x2, ball_to_LEFT_paddle_line.y2) && !ball.hit_paddle){
+      // check to see if paddle currently has a power up type "magnet"
       if(paddle.has_power_up && paddle.power_up_type == "magnet"){
         ball.y = constants.ball_start_y
         ball.hit_paddle = true
@@ -239,6 +284,7 @@ function draw() {
 
     // IF BALL HITS CENTER, RIGHT AREA OF PADDLE
     if(Util.ballCollideWithPaddle(ball, ball_to_RIGHT_paddle_line.x2, ball_to_RIGHT_paddle_line.y2) && !ball.hit_paddle){
+      // check to see if paddle currently has a power up type "magnet"
       if(paddle.has_power_up && paddle.power_up_type == "magnet"){
         ball.y = constants.ball_start_y
         ball.hit_paddle = true

@@ -9,6 +9,9 @@ function Paddle(){
   this.stroke_color = "black"
   this.edge_fills = "white"
   this.center_fills = "black"
+  this.left_laser_beams = []
+  this.right_laser_beams = []
+  this.interval_id = null
 }
 
 Paddle.prototype.display = function(){
@@ -45,18 +48,37 @@ Paddle.prototype.moveRight = function(){
 }
 
 Paddle.prototype.add_power_up = function(item){
-  this.has_power_up = true
-  this.power_up_type = item
-  if(item == "magnet"){
-    // this.center_fills = "blue"
-    // this.stroke_color = "blue"
-    this.edge_fills = "blue"
+  if(!this.has_power_up){
+    this.has_power_up = true
+    this.power_up_type = item
+    let interval_id;
+    if(item == "magnet"){
+      // this.center_fills = "blue"
+      // this.stroke_color = "blue"
+      this.edge_fills = "blue"
+    }else if(item == "laser"){
+      this.edge_fills = "red"
+      this.interval_id = setInterval(function(){this.shootLaser()}.bind(this), 1000)
+    }
+    setTimeout(()=>{
+      // this.center_fills = "black"
+      // this.stroke_color = "black"
+      this.edge_fills = "white"
+      this.has_power_up = false
+      this.power_up_type = null
+      clearInterval(this.interval_id)
+    }, 10000)
   }
-  setTimeout(()=>{
-    // this.center_fills = "black"
-    // this.stroke_color = "black"
-    this.edge_fills = "white"
-    this.has_power_up = false
-    this.power_up_type = null
-  }, 10000)
+}
+
+Paddle.prototype.shootLaser = function(){
+  let paddle_x = this.x - constants.paddle_center_areas_width-constants.paddle_edges_width
+
+  let laser_left_x = ((paddle_x + (constants.paddle_edges_width / 2)) - (constants.laser_beam_width/2))
+
+  let laser_right_x = ((paddle_x + constants.paddle_full_width) - (constants.paddle_edges_width/2)) - (constants.laser_beam_width/2)
+  let left_laser_beam = new LaserBeam(laser_left_x, this.y, "left")
+  let right_laser_beam = new LaserBeam(laser_right_x, this.y, "right")
+  this.left_laser_beams.push(left_laser_beam)
+  this.right_laser_beams.push(right_laser_beam)
 }

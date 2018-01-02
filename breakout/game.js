@@ -9,6 +9,7 @@ function Game(){
   this.set_items_randomly = true
   this.items_indices = []
   this.visible_items = {}
+
 }
 
 Game.prototype.addItem = function(item){
@@ -40,6 +41,7 @@ Game.prototype.createBlocks = function(){
 
 Game.prototype.setStartPosition = function(angle_pointer, ball, paddle){
   let angle_start_x = constants.angle_pointer_start_x
+  // check to see if starting position should adjust for magnet powerup
   if(angle_pointer.render_for_magnet){
     angle_start_x = ball.x
     angle_pointer.displayForMagnet(ball.x)
@@ -112,6 +114,7 @@ Game.prototype.newGame = function(angle_pointer, ball, paddle){
   let game_over_modal = document.getElementById('game-over-modal')
   let score_board = document.getElementById("score-board")
   game_over_modal.style.display = "none";
+  this.set_items_randomly = true
   this.blocks = {}
   this.createBlocks()
   this.score = 0

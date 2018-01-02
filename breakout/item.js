@@ -10,10 +10,11 @@ function Item(x,y,i,type){
 }
 
 Item.prototype.checkForCollisionWithPaddle = function(paddle){
+  // collision detection between paddle and falling item
   let paddle_x = paddle.x - constants.paddle_center_areas_width-constants.paddle_edges_width
+
   if (this.x < paddle_x + paddle.width && this.x + this.width > paddle_x &&
    this.y < paddle.y + paddle.height && this.height + this.y > paddle.y) {
-     console.log("item hit paddle")
      paddle.add_power_up(this.type)
      return true
   }

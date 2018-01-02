@@ -63,7 +63,6 @@ Block.prototype.checkForSideCollisionWithBall = function(ball){
   let distance_between_points_RIGHT = dist(ball.x+ball.change_x, ball.y+ball.change_y, this.x+this.width, side_y_value)
   if( (distance_between_points_LEFT <= ball.radius || distance_between_points_RIGHT <= ball.radius) && !this.top_or_bottom_was_hit){
     this.side_was_hit = true
-    debugger
     return true
   }
 
