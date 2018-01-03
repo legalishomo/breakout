@@ -3,8 +3,6 @@
 
 An implementation of the classic Breakout game released in 1976 and created by Steve Wozniak.
 
-![BreakoutGame](https://raw.githubusercontent.com/01omartorres/Breakout/master/images/breakout_welcome_screen.png)
-
 ![BreakoutGif](https://raw.githubusercontent.com/01omartorres/Breakout/master/images/breakout_video.gif)
 
 # Technologies
