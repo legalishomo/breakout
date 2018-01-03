@@ -1,4 +1,5 @@
 # Breakout
+[PLAY](https://01omartorres.github.io/Breakout)
 
 An implementation of the classic Breakout game released in 1976 and created by Steve Wozniak.
 
