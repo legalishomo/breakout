@@ -59,6 +59,7 @@ Game.prototype.setStartPosition = function(angle_pointer, ball, paddle){
       return
     }else{
       angle_pointer.angle += 1
+      // convert new_angle to radians
       let new_angle = (angle_pointer.angle) * (Math.PI / 180)
       let x_length = Math.cos(new_angle) * angle_pointer.length
       angle_pointer.x = angle_start_x + x_length
