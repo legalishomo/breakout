@@ -7,11 +7,11 @@ An implementation of the classic Breakout game released in 1976 and created by S
 
 # Controls
 
-A Key - Move angle pointer left.
-D Key - Move angle pointer right.
-UP ARROW KEY - Release ball.
-LEFT ARROW KEY - Move paddle left.
-RIGHT ARROW KEY - Move paddle right.
+* A Key - Move angle pointer left.
+* D Key - Move angle pointer right.
+* UP ARROW KEY - Release ball.
+* LEFT ARROW KEY - Move paddle left.
+* RIGHT ARROW KEY - Move paddle right.
 
 # Technologies
 
@@ -30,20 +30,18 @@ However, unlike the classic game I chose to take on the challenge of implementin
 
 Two of the main (and related) challenges I encountered while building this game were creating the target pointer to allow the player to choose where to initially direct the ball, and reflecting the ball at different angles depending on where on the paddle the ball lands. Suffice it to say that I had to revisit high school trigonometry. 
 
-![sketch](https://raw.githubusercontent.com/01omartorres/Breakout/master/images/sketch_idea.jpg)
+![sketch](https://raw.githubusercontent.com/01omartorres/Breakout/master/images/sketch_idea.JPG)
 
 By far the most difficult part of building this game, however, was figuring out how to detect collision between the ball and the paddle. It's not as simple as it sounds. What I did was I created an invisible line with one end point on the paddle and the other on the center of the ball at all times. Thus, the line's endpoints would consistently change depending on where the ball was at any point in time. I then calculated if the distance between the two endpoint was less than or equal to the radius of the ball. If this case returned true, then I knew that the ball and the paddle were colliding. 
 
 
 ```javascript
-const Util = {
   ballCollideWithPaddle: function(ball, point_x, point_y){
     let distance_between_points = dist(ball.x, ball.y, point_x, point_y)
     if(dist(ball.x+ball.change_x, ball.y+ball.change_y, point_x, point_y) <= ball.radius){
       return true
     }
   }
-}
 ```
 
 
