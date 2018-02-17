@@ -7,6 +7,8 @@ const paddle_center_areas_width= 50
 // 25 - 50 - 50 - 50 - 25
 const paddle_height = 20
 const canvas_width = 900;
+// const canvas_width = 700;
+// const canvas_height = 500;
 const canvas_height = 700;
 const paddle_start_x = 350 - (paddle_center_areas_width/2)
 
